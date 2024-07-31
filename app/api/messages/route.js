@@ -33,17 +33,40 @@ let messagesByNumber = {
 };
 
 export async function GET(req) {
-  const { number } = req.nextUrl.searchParams;
+  const { searchParams } = new URL(req.url);
+  const mode = searchParams.get('hub.mode');
+  const challenge = searchParams.get('hub.challenge');
+  const verifyToken = searchParams.get('hub.verify_token');
 
-  if (number) {
-    // Fetch messages for a specific phone number
-    return NextResponse.json(messagesByNumber[number] || []);
+  if (mode === 'subscribe' && verifyToken === process.env.VERIFY_TOKEN) {
+    return new NextResponse(challenge, { status: 200 });
   } else {
-    // Fetch all messages grouped by phone number
-    return NextResponse.json(messagesByNumber);
+    return new NextResponse('Forbidden', { status: 403 });
   }
 }
 
 export async function POST(req) {
-  return new Response('Method Not Allowed', { status: 405 });
+  const body = await req.json();
+  console.log('Received webhook event:', body);
+
+  const { messages } = body.entry[0].changes[0].value;
+  messages.forEach((message) => {
+    const from = message.from;
+    const text = message.text.body;
+    
+    if (!messagesByNumber[from]) {
+      messagesByNumber[from] = [];
+    }
+
+    messagesByNumber[from].push({
+      id: messagesByNumber[from].length + 1,
+      name: "User" + from, // or another identifier if available
+      text: text,
+      sent: false
+    });
+  });
+
+  return new NextResponse('EVENT_RECEIVED');
 }
+
+export { messagesByNumber }; // export messagesByNumber for use in other modules

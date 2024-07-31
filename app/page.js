@@ -1,5 +1,4 @@
 "use client"
-// In pages/index.js
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -25,7 +24,11 @@ export default function Home() {
         console.error('Error fetching contacts:', error);
       }
     };
+    
     fetchContacts();
+    
+    const interval = setInterval(fetchContacts, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
 
   const fetchMessages = async (number) => {
