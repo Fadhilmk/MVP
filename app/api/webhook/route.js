@@ -9,7 +9,7 @@ export async function GET(req) {
 
   // Check the mode and verify token
   if (mode === 'subscribe' && verifyToken === process.env.VERIFY_TOKEN) {
-    return NextResponse.json(challenge);
+    return new NextResponse(challenge, { status: 200 });
   } else {
     return new NextResponse('Forbidden', { status: 403 });
   }
