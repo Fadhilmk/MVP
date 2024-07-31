@@ -38,6 +38,8 @@ export async function GET(req) {
   const challenge = searchParams.get('hub.challenge');
   const verifyToken = searchParams.get('hub.verify_token');
 
+  console.log('GET request params:', { mode, challenge, verifyToken });
+
   // Verify the webhook subscription
   if (mode === 'subscribe' && verifyToken === process.env.VERIFY_TOKEN) {
     return new NextResponse(challenge, { status: 200 });
