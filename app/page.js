@@ -1,5 +1,5 @@
-// app/page.jsx
-"use client";
+"use client"
+// In pages/index.js
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -11,41 +11,65 @@ export default function Home() {
 
   useEffect(() => {
     const fetchContacts = async () => {
-      const response = await axios.get('/api/messages');
-      setContacts(Object.keys(response.data));
+      try {
+        const response = await axios.get('/api/messages');
+        console.log('Fetched contacts response:', response);
+        if (response.data) {
+          const contactKeys = Object.keys(response.data);
+          console.log('Contact keys:', contactKeys);
+          setContacts(contactKeys);
+        } else {
+          console.log('No data in response');
+        }
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+      }
     };
     fetchContacts();
   }, []);
 
   const fetchMessages = async (number) => {
-    const response = await axios.get(`/api/messages?number=${number}`);
-    setMessages(response.data);
-    setSelectedContact(number);
+    try {
+      const response = await axios.get(`/api/messages?number=${number}`);
+      console.log(`Fetched messages for ${number}:`, response.data);
+      setMessages(response.data);
+      setSelectedContact(number);
+    } catch (error) {
+      console.error(`Error fetching messages for ${number}:`, error);
+    }
   };
 
   const sendMessage = async () => {
-    await axios.post('/api/send', {
-      to: selectedContact,
-      message: newMessage
-    });
-    setNewMessage('');
-    fetchMessages(selectedContact);
+    try {
+      await axios.post('/api/send', {
+        to: selectedContact,
+        message: newMessage
+      });
+      setNewMessage('');
+      fetchMessages(selectedContact);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
     <div className="container">
       <div className="sidebar">
         <h2>Contacts</h2>
-        {contacts.map((contact) => (
-          <div key={contact} className="contact" onClick={() => fetchMessages(contact)}>
-            {contact}
-          </div>
-        ))}
+        {contacts.length > 0 ? (
+          contacts.map((contact) => (
+            <div key={contact} className="contact" onClick={() => fetchMessages(contact)}>
+              {contact}
+            </div>
+          ))
+        ) : (
+          <div>No contacts found</div>
+        )}
       </div>
       <div className="chat">
         <div className="messages">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.sent ? 'sent' : 'received'}`}>
+          {messages.map((msg, index) => (
+            <div key={index} className={`message ${msg.sent ? 'sent' : 'received'}`}>
               {msg.name}: {msg.text}
             </div>
           ))}
