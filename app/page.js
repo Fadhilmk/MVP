@@ -21,12 +21,12 @@ export default function Home() {
           console.log('No data in response');
         }
       } catch (error) {
-        console.error('Error fetching contacts:', error);
+        console.error('Error fetching contacts:', error.response ? error.response.data : error.message);
       }
     };
-    
+
     fetchContacts();
-    
+
     const interval = setInterval(fetchContacts, 5000); // Poll every 5 seconds
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
@@ -38,7 +38,7 @@ export default function Home() {
       setMessages(response.data);
       setSelectedContact(number);
     } catch (error) {
-      console.error(`Error fetching messages for ${number}:`, error);
+      console.error(`Error fetching messages for ${number}:`, error.response ? error.response.data : error.message);
     }
   };
 
@@ -51,7 +51,7 @@ export default function Home() {
       setNewMessage('');
       fetchMessages(selectedContact);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending message:', error.response ? error.response.data : error.message);
     }
   };
 

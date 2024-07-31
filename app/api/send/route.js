@@ -1,4 +1,3 @@
-// app/api/send/route.js
 import axios from 'axios';
 
 const { GRAPH_API_TOKEN, BUSINESS_PHONE_NUMBER_ID } = process.env;

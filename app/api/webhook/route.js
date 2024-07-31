@@ -1,4 +1,3 @@
-// api/webhook/router.js
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {

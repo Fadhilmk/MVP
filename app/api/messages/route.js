@@ -1,25 +1,3 @@
-// // app/api/messages/route.js
-// import { NextResponse } from 'next/server';
-
-// const messagesByNumber = {}; // Adapt to your data source
-
-// export async function GET(req) {
-//   const { searchParams } = new URL(req.url);
-//   const number = searchParams.get('number');
-
-//   if (number) {
-//     // Fetch messages for a specific phone number
-//     return NextResponse.json(messagesByNumber[number] || []);
-//   } else {
-//     // Fetch all messages grouped by phone number
-//     return NextResponse.json(messagesByNumber);
-//   }
-// }
-
-// export async function POST(req) {
-//   return new Response('Method Not Allowed', { status: 405 });
-// }
-
 import { NextResponse } from 'next/server';
 
 let messagesByNumber = {
@@ -34,17 +12,12 @@ let messagesByNumber = {
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const mode = searchParams.get('hub.mode');
-  const challenge = searchParams.get('hub.challenge');
-  const verifyToken = searchParams.get('hub.verify_token');
+  const number = searchParams.get('number');
 
-  console.log('GET request params:', { mode, challenge, verifyToken });
-
-  // Verify the webhook subscription
-  if (mode === 'subscribe' && verifyToken === process.env.VERIFY_TOKEN) {
-    return new NextResponse(challenge, { status: 200 });
+  if (number && messagesByNumber[number]) {
+    return new NextResponse(JSON.stringify(messagesByNumber[number]), { status: 200 });
   } else {
-    return new NextResponse('Forbidden', { status: 403 });
+    return new NextResponse('No messages found', { status: 404 });
   }
 }
 
@@ -72,5 +45,3 @@ export async function POST(req) {
 
   return new NextResponse('EVENT_RECEIVED');
 }
-
-export { messagesByNumber }; // Export for use in other modules
