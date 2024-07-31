@@ -38,6 +38,7 @@ export async function GET(req) {
   const challenge = searchParams.get('hub.challenge');
   const verifyToken = searchParams.get('hub.verify_token');
 
+  // Verify the webhook subscription
   if (mode === 'subscribe' && verifyToken === process.env.VERIFY_TOKEN) {
     return new NextResponse(challenge, { status: 200 });
   } else {
@@ -50,6 +51,7 @@ export async function POST(req) {
   console.log('Received webhook event:', body);
 
   const { messages } = body.entry[0].changes[0].value;
+
   messages.forEach((message) => {
     const from = message.from;
     const text = message.text.body;
@@ -60,7 +62,7 @@ export async function POST(req) {
 
     messagesByNumber[from].push({
       id: messagesByNumber[from].length + 1,
-      name: "User" + from, // or another identifier if available
+      name: "User" + from, // Use a better identifier if available
       text: text,
       sent: false
     });
@@ -69,4 +71,4 @@ export async function POST(req) {
   return new NextResponse('EVENT_RECEIVED');
 }
 
-export { messagesByNumber }; // export messagesByNumber for use in other modules
+export { messagesByNumber }; // Export for use in other modules
