@@ -1,89 +1,58 @@
 'use client';
 
-import { useEffect, useState } from 'react'
-import axios from 'axios';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
-  const [numbers, setNumbers] = useState([]);
-  const [selectedNumber, setSelectedNumber] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
-
-  // Function to fetch numbers from the API
-  const fetchNumbers = async () => {
-    try {
-      const response = await axios.get('/api/numbers');
-      setNumbers(response.data.numbers);
-    } catch (error) {
-      console.error('Error fetching numbers:', error);
-    }
-  };
+  const [message, setMessage] = useState('');
+  const [to, setTo] = useState('');
 
   useEffect(() => {
-    // Fetch numbers initially
-    fetchNumbers();
-
-    // Set up polling
-    const intervalId = setInterval(fetchNumbers, 5000); // Poll every 5 seconds
-    
-
-    // Cleanup polling on component unmount
-    return () => clearInterval(intervalId);
+    fetch('/api/messages')
+      .then(res => res.json())
+      .then(data => setMessages(data.messages || []));
   }, []);
 
-  const handleNumberClick = async (number) => {
-    setSelectedNumber(number);
-    try {
-      const response = await axios.get(`/api/messages?number=${number}`);
-      setMessages(response.data.messages);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (selectedNumber && messageInput) {
-      try {
-        await axios.post('/api/whatsapp/send', {
-          to: selectedNumber,
-          message: messageInput,
-        });
-        setMessageInput('');
-        // Optionally refresh messages or add the new message to the list
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
-    }
+  const sendMessage = async () => {
+    await fetch('/api/send-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, message })
+    });
+    setMessage('');
+    setTo('');
+    // Optionally fetch messages again
   };
 
   return (
-    <div>
-      <h1>WhatsApp Messages</h1>
+    <div className="p-4">
+      <h1 className="text-xl mb-4">WhatsApp Messages</h1>
       <div>
-        <h2>Numbers</h2>
+        <input
+          type="text"
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          placeholder="Recipient Number"
+          className="border p-2 mb-2"
+        />
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Your message"
+          className="border p-2 mb-2"
+        />
+        <button onClick={sendMessage} className="bg-blue-500 text-white p-2">Send Message</button>
+      </div>
+      <div className="mt-4">
+        <h2 className="text-lg">Received Messages</h2>
         <ul>
-          {numbers.map((number) => (
-            <li key={number} onClick={() => handleNumberClick(number)}>
-              {number}
+          {messages.map((msg, index) => (
+            <li key={index} className="border p-2 mb-2">
+              {msg.message}
             </li>
           ))}
         </ul>
       </div>
-      {selectedNumber && (
-        <div>
-          <h2>Messages for {selectedNumber}</h2>
-          <ul>
-            {messages.map((msg, index) => (
-              <li key={index}>{msg.text.body}</li>
-            ))}
-          </ul>
-          <textarea
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-          />
-          <button onClick={handleSendMessage}>Send</button>
-        </div>
-      )}
     </div>
   );
 }
