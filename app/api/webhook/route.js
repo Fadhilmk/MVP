@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-
 // Webhook verification
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
@@ -8,9 +7,12 @@ export async function GET(req) {
     const token = searchParams.get('hub.verify_token');
     const challenge = searchParams.get('hub.challenge');
 
+    console.log('Received verification request with:', { mode, token, challenge });
+
     if (mode && token === 'sample') {
         return NextResponse.json({ challenge });
     } else {
+        console.log('Verification failed:', { mode, token, VERIFY_TOKEN: 'sample' });
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 }
