@@ -1,4 +1,3 @@
-// // app/page.js
 
 // 'use client';
 
@@ -12,9 +11,7 @@
 //   const [messageInput, setMessageInput] = useState('');
 
 //   useEffect(() => {
-//     // Fetch the list of numbers and messages
 //     async function fetchData() {
-//       // Example data fetching, replace with your data source
 //       const response = await axios.get('/api/numbers');
 //       setNumbers(response.data.numbers);
 //     }
@@ -23,7 +20,6 @@
 
 //   const handleNumberClick = async (number) => {
 //     setSelectedNumber(number);
-//     // Fetch messages for the selected number
 //     const response = await axios.get(`/api/messages?number=${number}`);
 //     setMessages(response.data.messages);
 //   };
@@ -35,6 +31,7 @@
 //         message: messageInput,
 //       });
 //       setMessageInput('');
+//       // Optionally refresh messages or add the new message to the list
 //     }
 //   };
 
@@ -56,7 +53,7 @@
 //           <h2>Messages for {selectedNumber}</h2>
 //           <ul>
 //             {messages.map((msg, index) => (
-//               <li key={index}>{msg}</li>
+//               <li key={index}>{msg.text.body}</li>
 //             ))}
 //           </ul>
 //           <textarea
@@ -69,6 +66,7 @@
 //     </div>
 //   );
 // }
+
 
 'use client';
 
@@ -83,26 +81,39 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await axios.get('/api/numbers');
-      setNumbers(response.data.numbers);
+      try {
+        const response = await axios.get('/api/numbers');
+        setNumbers(response.data.numbers);
+      } catch (error) {
+        console.error('Failed to fetch numbers:', error);
+      }
     }
     fetchData();
   }, []);
 
   const handleNumberClick = async (number) => {
     setSelectedNumber(number);
-    const response = await axios.get(`/api/messages?number=${number}`);
-    setMessages(response.data.messages);
+    try {
+      const response = await axios.get(`/api/messages?number=${number}`);
+      setMessages(response.data.messages);
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    }
   };
 
   const handleSendMessage = async () => {
     if (selectedNumber && messageInput) {
-      await axios.post('/api/whatsapp/send', {
-        to: selectedNumber,
-        message: messageInput,
-      });
-      setMessageInput('');
-      // Optionally refresh messages or add the new message to the list
+      try {
+        await axios.post('/api/whatsapp/send', {
+          to: selectedNumber,
+          message: messageInput,
+        });
+        setMessageInput('');
+        // Optionally refresh messages
+        handleNumberClick(selectedNumber);
+      } catch (error) {
+        console.error('Failed to send message:', error);
+      }
     }
   };
 

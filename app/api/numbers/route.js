@@ -1,5 +1,5 @@
 export async function GET() {
-    // Mock data, replace with actual data source or database query
+    // Replace with actual database query
     const numbers = [
       '+1234567890',
       '+0987654321'
