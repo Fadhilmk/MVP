@@ -1,7 +1,6 @@
-// app/api/webhook/route.js
 import { NextResponse } from 'next/server';
 
-const VERIFY_TOKEN = 'sample'; // Your verification token
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN; // Read from environment variable
 
 export async function GET(request) {
   const url = new URL(request.url);
@@ -11,10 +10,18 @@ export async function GET(request) {
 
   if (mode && token) {
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('Webhook verified!');
-      return NextResponse.json(challenge, { headers: { 'Content-Type': 'text/plain' } });
+      return NextResponse.json(challenge);
     } else {
       return NextResponse.json('Forbidden', { status: 403 });
     }
   }
+  
+  return NextResponse.json('Bad Request', { status: 400 });
+}
+
+export async function POST(request) {
+  const data = await request.json();
+  console.log('Received data:', data);
+  // Process the data as needed
+  return NextResponse.json('Event received');
 }
