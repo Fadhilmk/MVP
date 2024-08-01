@@ -4,10 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 
-const InboxPage = () => {
+const InboxPage = ({ params }) => {
+  const { number } = params;
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const number = searchParams.get('number');
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
 
