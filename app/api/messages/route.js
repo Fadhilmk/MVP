@@ -1,15 +1,15 @@
-// app/api/messages/route.js
-
 export async function GET(req) {
     const url = new URL(req.url);
     const number = url.searchParams.get('number');
   
-    // Example data fetching, replace with your actual data source
+    // Mock data, replace with actual data source or database query
     const messages = [
-      { id: '1', text: 'Hello!' },
-      { id: '2', text: 'How are you?' },
-    ]; // Example static data
+      { from: number, text: { body: 'Hello!' } },
+      { from: number, text: { body: 'How can I help you?' } }
+    ];
   
-    return new Response(JSON.stringify({ messages }), { status: 200 });
+    return new Response(JSON.stringify({ messages }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
   

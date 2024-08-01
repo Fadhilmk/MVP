@@ -42,13 +42,13 @@
 
 import axios from 'axios';
 
-const ACCESS_TOKEN = 'EAAYbZBkW0wTYBOyobztQEp9qROj5i2Fy6FB4PIsJ7FPNvAgJMPhBiJxac8Dzc3fIK7Hmo1AhXSRuPz53mCzOUmJVuna0wEungVoWOhWd5qRgWIhtDRpKg4u9XFWYGf7RiC82lZCcYWnL2qeUdUTcXqgwZBxmv2XMQuAi3quzTfEaMmAvTs3SGA3ME8ge4aCUQ2L3fEzkIeajcsvNNdoFxGRT17I2ufN6ehuKnhtcH8ZD';
+const ACCESS_TOKEN = 'EAAYbZBkW0wTYBO4nErepARo7nfxCDofrTPBXZCInXygpNRkGoxLBlivUbXKmkGQRXJIUgQ2I4S1l1neCzESDV8v3tLxTjFRq7l3nUjwD5ih9bkHuuVvtgMfvWN3isF0RhEY3I8OvFSplDjNB9P7ml8GFURZA0HRBVnhC5R0nZCNtAxETMaxHmhI4rd8zHQDZBvyRrNYkvphLO8Y6yDJD8VIDYCvjkPehiTmBuhhjRhl7J';
 const PHONE_NUMBER_ID = '405411442646087';
 const WHATSAPP_API_BASE_URL = 'https://graph.facebook.com/v20.0';
 
 export async function POST(req) {
   const { action } = req.url.split('/').pop();
-  
+
   if (action === 'send') {
     const { to, message } = await req.json();
 
