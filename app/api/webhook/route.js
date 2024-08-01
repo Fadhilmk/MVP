@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 const VERIFY_TOKEN = 'sample'; // Your verification token
 
 export async function GET(request) {
+  console.log("hey")
   const url = new URL(request.url);
   const mode = url.searchParams.get('hub.mode');
   const token = url.searchParams.get('hub.verify_token');
