@@ -1,64 +1,69 @@
-"use client"
-import { useState, useEffect } from 'react';
+// app/page.js
+
+'use client';
+
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function Home() {
-  const [receivedMessages, setReceivedMessages] = useState([]);
+  const [numbers, setNumbers] = useState([]);
   const [selectedNumber, setSelectedNumber] = useState(null);
-  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState('');
 
   useEffect(() => {
-    // Fetch received messages from your server (implement accordingly)
-    async function fetchMessages() {
-      const response = await fetch('/api/getReceivedMessages');
-      const data = await response.json();
-      setReceivedMessages(data);
+    // Fetch the list of numbers and messages
+    async function fetchData() {
+      // Example data fetching, replace with your data source
+      const response = await axios.get('/api/numbers');
+      setNumbers(response.data.numbers);
     }
-
-    fetchMessages();
+    fetchData();
   }, []);
 
+  const handleNumberClick = async (number) => {
+    setSelectedNumber(number);
+    // Fetch messages for the selected number
+    const response = await axios.get(`/api/messages?number=${number}`);
+    setMessages(response.data.messages);
+  };
+
   const handleSendMessage = async () => {
-    await fetch('/api/sendMessage', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ to: selectedNumber, message })
-    });
-    setMessage('');
+    if (selectedNumber && messageInput) {
+      await axios.post('/api/whatsapp/send', {
+        to: selectedNumber,
+        message: messageInput,
+      });
+      setMessageInput('');
+    }
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Received Messages</h1>
-      <ul>
-        {receivedMessages.map((msg) => (
-          <li key={msg.id} className="mb-2">
-            <button
-              className="text-blue-500"
-              onClick={() => setSelectedNumber(msg.from)}
-            >
-              {msg.from}
-            </button>
-            <p>{msg.text}</p>
-          </li>
-        ))}
-      </ul>
+    <div>
+      <h1>WhatsApp Messages</h1>
+      <div>
+        <h2>Numbers</h2>
+        <ul>
+          {numbers.map((number) => (
+            <li key={number} onClick={() => handleNumberClick(number)}>
+              {number}
+            </li>
+          ))}
+        </ul>
+      </div>
       {selectedNumber && (
-        <div className="mt-4">
-          <h2 className="text-xl font-bold mb-2">Send a Message</h2>
+        <div>
+          <h2>Messages for {selectedNumber}</h2>
+          <ul>
+            {messages.map((msg, index) => (
+              <li key={index}>{msg}</li>
+            ))}
+          </ul>
           <textarea
-            className="w-full p-2 border border-gray-300"
-            rows="4"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
           />
-          <button
-            className="mt-2 bg-blue-500 text-white py-2 px-4 rounded"
-            onClick={handleSendMessage}
-          >
-            Send
-          </button>
+          <button onClick={handleSendMessage}>Send</button>
         </div>
       )}
     </div>

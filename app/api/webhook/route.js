@@ -1,27 +1,28 @@
-import { NextResponse } from 'next/server';
+// app/api/webhook/route.js
 
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN; // Read from environment variable
-
-export async function GET(request) {
-  const url = new URL(request.url);
-  const mode = url.searchParams.get('hub.mode');
-  const token = url.searchParams.get('hub.verify_token');
-  const challenge = url.searchParams.get('hub.challenge');
-
-  if (mode && token) {
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      return NextResponse.json(challenge);
+export async function GET(req) {
+    const url = new URL(req.url);
+    const hubMode = url.searchParams.get('hub.mode');
+    const hubChallenge = url.searchParams.get('hub.challenge');
+    const hubVerifyToken = url.searchParams.get('hub.verify_token');
+  
+    // Verify the token used by WhatsApp to validate the webhook subscription
+    if (hubMode === 'subscribe' && hubVerifyToken === 'sample') {
+      return new Response(hubChallenge, { status: 200 });
     } else {
-      return NextResponse.json('Forbidden', { status: 403 });
+      return new Response('Forbidden', { status: 403 });
     }
   }
   
-  return NextResponse.json('Bad Request', { status: 400 });
-}
-
-export async function POST(request) {
-  const data = await request.json();
-  console.log('Received data:', data);
-  // Process the data as needed
-  return NextResponse.json('Event received');
-}
+  export async function POST(req) {
+    const data = await req.json();
+  
+    // Process incoming messages here
+    if (data.object && data.entry) {
+      console.log('Webhook data:', data);
+      // Handle the incoming message here
+    }
+  
+    return new Response('OK', { status: 200 });
+  }
+  
