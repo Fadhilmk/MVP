@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 
 // Webhook verification
 export async function GET(req) {
@@ -9,7 +8,7 @@ export async function GET(req) {
     const token = searchParams.get('hub.verify_token');
     const challenge = searchParams.get('hub.challenge');
 
-    if (mode && token === VERIFY_TOKEN) {
+    if (mode && token === 'sample') {
         return NextResponse.json({ challenge });
     } else {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
