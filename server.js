@@ -5,18 +5,14 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const accessToken = 'EAAYbZBkW0wTYBO4nErepARo7nfxCDofrTPBXZCInXygpNRkGoxLBlivUbXKmkGQRXJIUgQ2I4S1l1neCzESDV8v3tLxTjFRq7l3nUjwD5ih9bkHuuVvtgMfvWN3isF0RhEY3I8OvFSplDjNB9P7ml8GFURZA0HRBVnhC5R0nZCNtAxETMaxHmhI4rd8zHQDZBvyRrNYkvphLO8Y6yDJD8VIDYCvjkPehiTmBuhhjRhl7J';
-const verifyToken = 'sample';
-const phoneNumberId = '405411442646087';
-
-// Store received messages in memory (for demonstration purposes)
-let receivedMessages = {};
+const accessToken = 'YOUR_ACCESS_TOKEN';
+const verifyToken = 'YOUR_VERIFY_TOKEN';
+const phoneNumberId = 'YOUR_PHONE_NUMBER_ID';
 
 app.use(bodyParser.json());
 
-// Verify webhook
+// Webhook verification
 app.get('/webhook', (req, res) => {
-  console.log('Received verification request:', req.query);
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
@@ -38,12 +34,8 @@ app.post('/webhook', (req, res) => {
       const from = message.from;
       const text = message.text.body;
 
-      if (!receivedMessages[from]) {
-        receivedMessages[from] = [];
-      }
-      receivedMessages[from].push({ text, from: 'user' });
-
       console.log(`Received message from ${from}: ${text}`);
+      // Handle storing or processing messages here
     }
 
     res.sendStatus(200);
@@ -58,7 +50,7 @@ app.post('/send', async (req, res) => {
 
   try {
     await axios.post(
-      `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
+      `https://graph.facebook.com/v14.0/${phoneNumberId}/messages`,
       {
         messaging_product: 'whatsapp',
         to: recipient,
@@ -72,28 +64,11 @@ app.post('/send', async (req, res) => {
       }
     );
 
-    if (!receivedMessages[recipient]) {
-      receivedMessages[recipient] = [];
-    }
-    receivedMessages[recipient].push({ text: message, from: 'me' });
-
     res.status(200).send('Message sent');
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).send('Error sending message');
   }
-});
-
-// Endpoint to get messages for a specific number
-app.get('/messages/:number', (req, res) => {
-  const number = req.params.number;
-  const messages = receivedMessages[number] || [];
-  res.json(messages);
-});
-
-// Endpoint to get the list of received numbers
-app.get('/messages', (req, res) => {
-  res.json(receivedMessages);
 });
 
 app.listen(PORT, () => {
