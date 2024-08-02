@@ -1,3 +1,5 @@
+// app/api/getMessages/route.js
+
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
 
@@ -15,9 +17,6 @@ export async function GET(req) {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*', // Allow requests from all origins
-      'Access-Control-Allow-Methods': 'GET',
-      'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
 }
