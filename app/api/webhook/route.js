@@ -24,7 +24,6 @@ export async function GET(req) {
 }
 
 // Handling POST request for webhook notifications
-import { NextResponse } from 'next/server';
 
 export async function POST(req) {
     try {
