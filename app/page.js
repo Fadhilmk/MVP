@@ -55,28 +55,36 @@ const HomePage = () => {
         <div className="p-6">
             <h1 className="text-2xl font-bold">WhatsApp Dashboard</h1>
             <ul className="mt-4 space-y-2">
-                {phoneNumbers.map((number) => (
-                    <li key={number} className="p-4 border rounded shadow-sm">
-                        <button onClick={() => { 
-                            setSelectedNumber(number);
-                            fetchMessages(number); 
-                        }} className="text-blue-500">
-                            {number}
-                        </button>
-                    </li>
-                ))}
+                {phoneNumbers.length === 0 ? (
+                    <li>No phone numbers available</li>
+                ) : (
+                    phoneNumbers.map((number) => (
+                        <li key={number} className="p-4 border rounded shadow-sm">
+                            <button onClick={() => { 
+                                setSelectedNumber(number);
+                                fetchMessages(number); 
+                            }} className="text-blue-500">
+                                {number}
+                            </button>
+                        </li>
+                    ))
+                )}
             </ul>
             {selectedNumber && (
                 <div className="mt-6">
                     <h2 className="text-xl font-semibold">Inbox for {selectedNumber}</h2>
                     <div className="mt-4 space-y-2">
-                        {messages.map((msg) => (
-                            <div key={msg.id} className="p-4 border rounded shadow-sm">
-                                <p><strong>From:</strong> {msg.from}</p>
-                                <p><strong>Message:</strong> {msg.text}</p>
-                                <p><strong>Time:</strong> {new Date(msg.timestamp * 1000).toLocaleString()}</p>
-                            </div>
-                        ))}
+                        {messages.length === 0 ? (
+                            <div>No messages available</div>
+                        ) : (
+                            messages.map((msg) => (
+                                <div key={msg.id} className="p-4 border rounded shadow-sm">
+                                    <p><strong>From:</strong> {msg.from}</p>
+                                    <p><strong>Message:</strong> {msg.text}</p>
+                                    <p><strong>Time:</strong> {new Date(msg.timestamp * 1000).toLocaleString()}</p>
+                                </div>
+                            ))
+                        )}
                     </div>
                     <div className="mt-4 flex">
                         <input

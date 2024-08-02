@@ -31,6 +31,7 @@ export async function POST(req) {
                 const messages = change.value.messages || [];
 
                 contactNumbers.forEach(number => phoneNumbers.add(number));
+                console.log('Updated Phone Numbers:', Array.from(phoneNumbers)); // Log updated phone numbers
 
                 messages.forEach(message => {
                     const number = message.from;
