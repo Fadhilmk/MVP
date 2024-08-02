@@ -10,7 +10,7 @@ export async function GET(req) {
     
     try {
         if (mode && token == 'sample') {
-            return NextResponse.json({ challenge });
+            return NextResponse.json( challenge );
         } else {
             console.log('Verification failed:', { mode, token, VERIFY_TOKEN: 'sample' });
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
