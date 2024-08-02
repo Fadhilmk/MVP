@@ -9,6 +9,6 @@ export async function GET(req) {
     
     // Get the messages for the specified phone number
     const messages = messagesStore[number] || [];
-
+    console.log(messages)
     return NextResponse.json({ messages });
 }

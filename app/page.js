@@ -117,6 +117,7 @@ const HomePage = () => {
             const response = await fetch('/api/phone-numbers');
             const data = await response.json();
             setPhoneNumbers(data.phoneNumbers);
+            console.log(phoneNumbers)
         } catch (error) {
             console.error('Error fetching phone numbers:', error);
         }
@@ -127,6 +128,7 @@ const HomePage = () => {
             const response = await fetch(`/api/messages?number=${number}`);
             const data = await response.json();
             setMessages(data.messages);
+            console.log(messages)
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
