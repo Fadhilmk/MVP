@@ -1,79 +1,201 @@
+// 'use client';
+// import { useEffect, useState } from 'react';
+
+// const HomePage = () => {
+//     const [phoneNumbers, setPhoneNumbers] = useState([]);
+//     const [selectedNumber, setSelectedNumber] = useState(null);
+//     const [messages, setMessages] = useState([]);
+//     const [newMessage, setNewMessage] = useState('');
+
+//     useEffect(() => {
+//         fetchPhoneNumbers();
+//     }, []);
+
+//     const fetchPhoneNumbers = async () => {
+//         try {
+//             const response = await fetch('/api/phone-numbers');
+//             const data = await response.json();
+//             setPhoneNumbers(data.phoneNumbers);
+//         } catch (error) {
+//             console.error('Error fetching phone numbers:', error);
+//         }
+//     };
+
+//     const fetchMessages = async (number) => {
+//         try {
+//             const response = await fetch(`/api/messages?number=${number}`);
+//             const data = await response.json();
+//             setMessages(data.messages);
+//         } catch (error) {
+//             console.error('Error fetching messages:', error);
+//         }
+//     };
+
+//     const handleSendMessage = async () => {
+//         if (!selectedNumber || !newMessage.trim()) return;
+
+//         try {
+//             await fetch('/api/send-message', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json'
+//                 },
+//                 body: JSON.stringify({ to: selectedNumber, message: newMessage })
+//             });
+//             setNewMessage('');
+//             fetchMessages(selectedNumber);
+//         } catch (error) {
+//             console.error('Error sending message:', error);
+//         }
+//     };
+
+//     return (
+//         <div className="p-6">
+//             <h1 className="text-2xl font-bold">WhatsApp Dashboard</h1>
+//             <ul className="mt-4 space-y-2">
+//                 {phoneNumbers.map((number) => (
+//                     <li key={number} className="p-4 border rounded shadow-sm">
+//                         <button onClick={() => { 
+//                             setSelectedNumber(number);
+//                             fetchMessages(number); 
+//                         }} className="text-blue-500">
+//                             {number}
+//                         </button>
+//                     </li>
+//                 ))}
+//             </ul>
+//             {selectedNumber && (
+//                 <div className="mt-6">
+//                     <h2 className="text-xl font-semibold">Inbox for {selectedNumber}</h2>
+//                     <div className="mt-4 space-y-2">
+//                         {messages.map((msg) => (
+//                             <div key={msg.id} className="p-4 border rounded shadow-sm">
+//                                 <p><strong>From:</strong> {msg.from}</p>
+//                                 <p><strong>Message:</strong> {msg.text}</p>
+//                                 <p><strong>Time:</strong> {new Date(msg.timestamp * 1000).toLocaleString()}</p>
+//                             </div>
+//                         ))}
+//                     </div>
+//                     <div className="mt-4 flex">
+//                         <input
+//                             type="text"
+//                             placeholder="Type your message..."
+//                             value={newMessage}
+//                             onChange={(e) => setNewMessage(e.target.value)}
+//                             className="p-2 border rounded flex-grow"
+//                         />
+//                         <button
+//                             onClick={handleSendMessage}
+//                             className="ml-2 px-4 py-2 bg-blue-500 text-white rounded"
+//                         >
+//                             Send
+//                         </button>
+//                     </div>
+//                 </div>
+//             )}
+//         </div>
+//     );
+// };
+
+// export default HomePage;
+
 'use client';
+import { useEffect, useState } from 'react';
 
-import { useState, useEffect } from 'react';
-
-export default function Home() {
+const HomePage = () => {
+    const [phoneNumbers, setPhoneNumbers] = useState([]);
+    const [selectedNumber, setSelectedNumber] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [message, setMessage] = useState('');
-    const [to, setTo] = useState('');
-    const [error, setError] = useState(null);
+    const [newMessage, setNewMessage] = useState('');
 
     useEffect(() => {
-        fetch('/api/messages')
-            .then(res => {
-                if (!res.ok) throw new Error('Network response was not ok');
-                return res.json();
-            })
-            .then(data => setMessages(data.messages || []))
-            .catch(error => {
-                console.error('Error fetching messages:', error);
-                setError('Failed to load messages');
-            });
+        fetchPhoneNumbers();
     }, []);
 
-    const sendMessage = async () => {
+    const fetchPhoneNumbers = async () => {
         try {
-            const response = await fetch('/api/send-message', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ to, message })
-            });
-            if (!response.ok) throw new Error('Network response was not ok');
+            const response = await fetch('/api/phone-numbers');
             const data = await response.json();
+            setPhoneNumbers(data.phoneNumbers);
+        } catch (error) {
+            console.error('Error fetching phone numbers:', error);
+        }
+    };
 
-            if (response.ok) {
-                setMessages(prevMessages => [...prevMessages, data]);
-                setMessage('');
-                setTo('');
-            } else {
-                setError('Failed to send message');
-            }
+    const fetchMessages = async (number) => {
+        try {
+            const response = await fetch(`/api/messages?number=${number}`);
+            const data = await response.json();
+            setMessages(data.messages);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!selectedNumber || !newMessage.trim()) return;
+
+        try {
+            await fetch('/api/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ to: selectedNumber, message: newMessage })
+            });
+            setNewMessage('');
+            fetchMessages(selectedNumber);
         } catch (error) {
             console.error('Error sending message:', error);
-            setError('Failed to send message');
         }
     };
 
     return (
-        <div className="p-4">
-            <h1 className="text-xl mb-4">WhatsApp Messages</h1>
-            {error && <div className="text-red-500 mb-4">{error}</div>}
-            <div>
-                <input
-                    type="text"
-                    value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                    placeholder="Recipient Number"
-                    className="border p-2 mb-2"
-                />
-                <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Your message"
-                    className="border p-2 mb-2"
-                />
-                <button onClick={sendMessage} className="bg-blue-500 text-white p-2">Send Message</button>
-            </div>
-            <div className="mt-4">
-                <h2 className="text-lg">Received Messages</h2>
-                <ul>
-                    {messages.map((msg, index) => (
-                        <li key={index} className="border p-2 mb-2">
-                            {msg.text}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold">WhatsApp Dashboard</h1>
+            <ul className="mt-4 space-y-2">
+                {phoneNumbers.map((number) => (
+                    <li key={number} className="p-4 border rounded shadow-sm">
+                        <button onClick={() => { 
+                            setSelectedNumber(number);
+                            fetchMessages(number); 
+                        }} className="text-blue-500">
+                            {number}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+            {selectedNumber && (
+                <div className="mt-6">
+                    <h2 className="text-xl font-semibold">Inbox for {selectedNumber}</h2>
+                    <div className="mt-4 space-y-2">
+                        {messages.map((msg) => (
+                            <div key={msg.id} className="p-4 border rounded shadow-sm">
+                                <p><strong>From:</strong> {msg.from}</p>
+                                <p><strong>Message:</strong> {msg.text}</p>
+                                <p><strong>Time:</strong> {new Date(msg.timestamp * 1000).toLocaleString()}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-4 flex">
+                        <input
+                            type="text"
+                            placeholder="Type your message..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            className="p-2 border rounded flex-grow"
+                        />
+                        <button
+                            onClick={handleSendMessage}
+                            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
-}
+};
+
+export default HomePage;
