@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+// Handling GET request for webhook verification
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const mode = searchParams.get('hub.mode');
@@ -7,10 +8,11 @@ export async function GET(req) {
     const challenge = searchParams.get('hub.challenge');
 
     console.log('Received verification request with:', { mode, token, challenge });
-    
+
     try {
-        if (mode && token == 'sample') {
-            return NextResponse.json( challenge );
+        if (mode === 'subscribe' && token === 'sample') {
+            console.log(challenge);
+            return new NextResponse(challenge);
         } else {
             console.log('Verification failed:', { mode, token, VERIFY_TOKEN: 'sample' });
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -21,8 +23,7 @@ export async function GET(req) {
     }
 }
 
-
-// Webhook notifications
+// Handling POST request for webhook notifications
 export async function POST(req) {
     try {
         const body = await req.json();
