@@ -69,7 +69,7 @@ export default function Home() {
                 <ul>
                     {messages.map((msg, index) => (
                         <li key={index} className="border p-2 mb-2">
-                            {msg.message}
+                            {msg.text}
                         </li>
                     ))}
                 </ul>
