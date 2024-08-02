@@ -1,4 +1,8 @@
 const PhoneNumberList = ({ phoneNumbers, onPhoneNumberClick }) => {
+    if (!phoneNumbers || phoneNumbers.length === 0) {
+      return <p>No phone numbers available</p>;
+    }
+  
     return (
       <div className="p-4">
         {phoneNumbers.map((number) => (

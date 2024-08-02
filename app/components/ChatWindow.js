@@ -6,8 +6,13 @@ const ChatWindow = ({ phoneNumber, messages, accessToken, phoneNumberId }) => {
   const [messageText, setMessageText] = useState('');
 
   const handleSendMessage = async () => {
-    await sendMessage(phoneNumberId, phoneNumber, messageText, accessToken);
-    setMessageText('');
+    try {
+      await sendMessage(phoneNumberId, phoneNumber, messageText, accessToken);
+      setMessageText('');
+      // Optionally, fetch the messages again to update the UI
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
   };
 
   return (
