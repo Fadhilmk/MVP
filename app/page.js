@@ -1,69 +1,38 @@
-// "use client";
-// import { useState } from 'react';
-// import PhoneNumberList from './components/PhoneNumberList';
-// import ChatWindow from './components/ChatWindow';
-// import useFetch from '../hooks/useFetch';
+"use client"
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { db } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
-// const HomePage = () => {
-//   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState(null);
-//   const { data: phoneNumbers } = useFetch('/api/getPhoneNumbers');
-//   const { data: messages } = useFetch(`/api/getMessages?phoneNumber=${selectedPhoneNumber}`);
+export default function Home() {
+    const [phoneNumbers, setPhoneNumbers] = useState([]);
 
-//   return (
-//     <div className="flex flex-col h-screen p-4">
-//       <h1 className="text-3xl font-bold mb-4">WhatsApp Messaging System</h1>
-//       <div className="flex flex-grow">
-//         <PhoneNumberList phoneNumbers={phoneNumbers} onPhoneNumberClick={setSelectedPhoneNumber} />
-//         {selectedPhoneNumber && (
-//           <ChatWindow
-//             phoneNumber={selectedPhoneNumber}
-//             messages={messages}
-//             accessToken="EAAYbZBkW0wTYBO4nErepARo7nfxCDofrTPBXZCInXygpNRkGoxLBlivUbXKmkGQRXJIUgQ2I4S1l1neCzESDV8v3tLxTjFRq7l3nUjwD5ih9bkHuuVvtgMfvWN3isF0RhEY3I8OvFSplDjNB9P7ml8GFURZA0HRBVnhC5R0nZCNtAxETMaxHmhI4rd8zHQDZBvyRrNYkvphLO8Y6yDJD8VIDYCvjkPehiTmBuhhjRhl7J" // Use your actual access token
-//             phoneNumberId="405411442646087" // Use your actual phone number ID
-//           />
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
+    useEffect(() => {
+        const fetchPhoneNumbers = async () => {
+            const querySnapshot = await getDocs(collection(db, 'messages'));
+            const numbers = new Set();
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                numbers.add(data.userPhoneNumber);
+            });
+            setPhoneNumbers(Array.from(numbers));
+        };
 
-// export default HomePage;
+        fetchPhoneNumbers();
+    }, []);
 
-
-// app/page.js
-
-"use client";
-import { useState } from 'react';
-import PhoneNumberList from './components/PhoneNumberList';
-import ChatWindow from './components/ChatWindow';
-import useFetch from '../hooks/useFetch';
-
-const HomePage = () => {
-  const [selectedPhoneNumber, setSelectedPhoneNumber] = useState(null);
-  const { data: phoneNumbers, loading: phoneNumbersLoading } = useFetch('https://mvp-8571.onrender.com/api/getPhoneNumbers');
-  const { data: messages, loading: messagesLoading } = useFetch(`https://mvp-8571.onrender.com/api/getMessages?phoneNumber=${selectedPhoneNumber}`);
-
-  return (
-    <div className="flex flex-col h-screen p-4">
-      <h1 className="text-3xl font-bold mb-4">WhatsApp Messaging System</h1>
-      <div className="flex flex-grow">
-        {phoneNumbersLoading ? (
-          <p>Loading phone numbers...</p>
-        ) : (
-          <PhoneNumberList phoneNumbers={phoneNumbers} onPhoneNumberClick={setSelectedPhoneNumber} />
-        )}
-        {selectedPhoneNumber && (
-          <ChatWindow
-            phoneNumber={selectedPhoneNumber}
-            messages={messages}
-            accessToken="EAAYbZBkW0wTYBO4nErepARo7nfxCDofrTPBXZCInXygpNRkGoxLBlivUbXKmkGQRXJIUgQ2I4S1l1neCzESDV8v3tLxTjFRq7l3nUjwD5ih9bkHuuVvtgMfvWN3isF0RhEY3I8OvFSplDjNB9P7ml8GFURZA0HRBVnhC5R0nZCNtAxETMaxHmhI4rd8zHQDZBvyRrNYkvphLO8Y6yDJD8VIDYCvjkPehiTmBuhhjRhl7J" // Use your actual access token
-            phoneNumberId="405411442646087" // Use your actual phone number ID
-          />
-        )}
-        {messagesLoading && selectedPhoneNumber && <p>Loading messages...</p>}
-      </div>
-    </div>
-  );
-};
-
-export default HomePage;
+    return (
+        <div className="container mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-4">Received Numbers</h1>
+            <ul>
+                {phoneNumbers.map((number) => (
+                    <li key={number}>
+                        <Link href={`/${number}`} className="text-blue-600 hover:underline">
+                            {number}
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
