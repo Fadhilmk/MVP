@@ -24,10 +24,13 @@ export async function GET(req) {
 }
 
 // Handling POST request for webhook notifications
+import { NextResponse } from 'next/server';
+
 export async function POST(req) {
     try {
         const body = await req.json();
-        console.log('Webhook event received:', body);
+        console.log(body);
+        console.log('Incoming webhook: ' + JSON.stringify(body));
 
         // Process the webhook data here if needed
         // Example: Save to database or trigger some action
