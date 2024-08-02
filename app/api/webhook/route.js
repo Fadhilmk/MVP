@@ -89,6 +89,7 @@ export async function POST(req) {
                 change.value.contacts.flatMap(contact => {
                     const number = contact.wa_id;
                     phoneNumbers.add(number);
+                    console.log(phoneNumbers)
 
                     // Add message to messages store if it exists
                     if (change.value.messages) {
@@ -102,6 +103,7 @@ export async function POST(req) {
                                 text: message.text.body,
                                 timestamp: message.timestamp,
                             });
+                            console.log(messagesStore[number])
                         });
                     }
                     return number;
