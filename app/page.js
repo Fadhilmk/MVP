@@ -16,6 +16,7 @@ const HomePage = () => {
             const response = await fetch('/api/phone-numbers');
             const data = await response.json();
             setPhoneNumbers(data.phoneNumbers);
+            console.log('Phone Numbers:', data.phoneNumbers);
         } catch (error) {
             console.error('Error fetching phone numbers:', error);
         }
@@ -26,6 +27,7 @@ const HomePage = () => {
             const response = await fetch(`/api/messages?number=${number}`);
             const data = await response.json();
             setMessages(data.messages);
+            console.log('Messages:', data.messages);
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
