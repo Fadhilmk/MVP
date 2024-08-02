@@ -40,8 +40,8 @@ import useFetch from '../hooks/useFetch';
 
 const HomePage = () => {
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState(null);
-  const { data: phoneNumbers, loading: phoneNumbersLoading } = useFetch('https://mvp-eight-mu.vercel.app/api/getPhoneNumbers');
-  const { data: messages, loading: messagesLoading } = useFetch(`https://mvp-eight-mu.vercel.app/api/getMessages?phoneNumber=${selectedPhoneNumber}`);
+  const { data: phoneNumbers, loading: phoneNumbersLoading } = useFetch('/api/getPhoneNumbers');
+  const { data: messages, loading: messagesLoading } = useFetch(`/api/getMessages?phoneNumber=${selectedPhoneNumber}`);
 
   return (
     <div className="flex flex-col h-screen p-4">
