@@ -9,7 +9,7 @@ export async function GET(req) {
 
     console.log('Received verification request with:', { mode, token, challenge });
 
-    if (mode && token === 'sample') {
+    if (mode && token == 'sample') {
         return NextResponse.json({ challenge });
     } else {
         console.log('Verification failed:', { mode, token, VERIFY_TOKEN: 'sample' });
