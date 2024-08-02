@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-
+import store from '../store';
 // In-memory stores
-let phoneNumbers = new Set();
-let messagesStore = {};
+
 
 // Handle GET request for webhook verification
 export async function GET(req) {
@@ -21,40 +20,35 @@ export async function GET(req) {
 // Handle POST request for webhook notifications
 export async function POST(req) {
     try {
-        const body = await req.json();
-        console.log('Incoming webhook:', JSON.stringify(body));
-
-        // Extract phone numbers and messages
-        body.entry.flatMap(entry =>
-            entry.changes.flatMap(change => {
-                const contactNumbers = change.value.contacts.map(contact => contact.wa_id);
-                const messages = change.value.messages || [];
-
-                contactNumbers.forEach(number => phoneNumbers.add(number));
-                console.log('Updated Phone Numbers:', Array.from(phoneNumbers)); // Log updated phone numbers
-
-                messages.forEach(message => {
-                    const number = message.from;
-                    if (!messagesStore[number]) {
-                        messagesStore[number] = [];
-                    }
-                    messagesStore[number].push({
-                        id: message.id,
-                        from: number,
-                        text: message.text.body,
-                        timestamp: message.timestamp,
-                    });
-                });
-
-                return contactNumbers;
-            })
-        );
-
-        // Convert Set to Array for JSON response
-        const phoneNumbersArray = Array.from(phoneNumbers);
-        return NextResponse.json({ message: 'EVENT_RECEIVED', phoneNumbers: phoneNumbersArray });
+      const body = await req.json();
+      console.log('Incoming webhook:', JSON.stringify(body));
+  
+      // Extract phone numbers and messages
+      body.entry.flatMap(entry =>
+        entry.changes.flatMap(change => {
+          const contactNumbers = change.value.contacts.map(contact => contact.wa_id);
+          const messages = change.value.messages || [];
+  
+          contactNumbers.forEach(number => store.addPhoneNumber(number));
+          console.log('Updated Phone Numbers:', store.getPhoneNumbers());
+  
+          messages.forEach(message => {
+            const number = message.from;
+            store.addMessage(number, {
+              id: message.id,
+              from: number,
+              text: message.text.body,
+              timestamp: message.timestamp,
+            });
+          });
+  
+          return contactNumbers;
+        })
+      );
+  
+      return NextResponse.json({ message: 'EVENT_RECEIVED' });
     } catch (error) {
-        console.error('Error handling webhook:', error);
-        return NextResponse.json({ error: 'Failed to process webhook' }, { status: 500 });
+      console.error('Error handling webhook:', error);
+      return NextResponse.json({ error: 'Failed to process webhook' }, { status: 500 });
     }
-}
+  }
