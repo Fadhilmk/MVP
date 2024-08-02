@@ -59,7 +59,7 @@
 
 import { NextResponse } from 'next/server';
 
-// In-memory stores for phone numbers and messages (Replace with actual database logic)
+// In-memory stores for phone numbers and messages
 let phoneNumbers = new Set();
 let messagesStore = {};
 
@@ -83,32 +83,28 @@ export async function POST(req) {
         const body = await req.json();
         console.log('Incoming webhook:', JSON.stringify(body));
 
-        // Extract phone numbers and messages from the webhook payload
         body.entry.flatMap(entry =>
-            entry.changes.flatMap(change =>
-                change.value.contacts.flatMap(contact => {
-                    const number = contact.wa_id;
-                    phoneNumbers.add(number);
-                    console.log(phoneNumbers)
+            entry.changes.flatMap(change => {
+                const contactNumbers = change.value.contacts.map(contact => contact.wa_id);
+                const messages = change.value.messages || [];
 
-                    // Add message to messages store if it exists
-                    if (change.value.messages) {
-                        if (!messagesStore[number]) {
-                            messagesStore[number] = [];
-                        }
-                        change.value.messages.forEach(message => {
-                            messagesStore[number].push({
-                                id: message.id,
-                                from: message.from,
-                                text: message.text.body,
-                                timestamp: message.timestamp,
-                            });
-                            console.log(messagesStore[number])
-                        });
+                contactNumbers.forEach(number => phoneNumbers.add(number));
+
+                messages.forEach(message => {
+                    const number = message.from;
+                    if (!messagesStore[number]) {
+                        messagesStore[number] = [];
                     }
-                    return number;
-                })
-            )
+                    messagesStore[number].push({
+                        id: message.id,
+                        from: number,
+                        text: message.text.body,
+                        timestamp: message.timestamp,
+                    });
+                });
+
+                return contactNumbers;
+            })
         );
 
         // Convert Set to Array for JSON response
