@@ -8,13 +8,13 @@ export async function GET(req) {
     const challenge = searchParams.get('hub.challenge');
 
     console.log('Received verification request with:', { mode, token, challenge });
-
-    if (mode && token == 'sample') {
-        return NextResponse.json({ challenge });
-    } else {
-        console.log('Verification failed:', { mode, token, VERIFY_TOKEN: 'sample' });
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    return NextResponse.json({ challenge });
+    // if (mode && token == 'sample') {
+    //     return NextResponse.json({ challenge });
+    // } else {
+    //     console.log('Verification failed:', { mode, token, VERIFY_TOKEN: 'sample' });
+    //     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // }
 }
 
 // Webhook notifications
