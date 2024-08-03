@@ -1,68 +1,26 @@
-// "use client"
-// import { useEffect, useState } from 'react';
-// import Link from 'next/link';
-// import { db } from '../firebase';
-// import { collection, getDocs } from 'firebase/firestore';
-
-// export default function Home() {
-//     const [phoneNumbers, setPhoneNumbers] = useState([]);
-
-//     useEffect(() => {
-//         const fetchPhoneNumbers = async () => {
-//             const querySnapshot = await getDocs(collection(db, 'messages'));
-//             const numbers = new Set();
-//             querySnapshot.forEach((doc) => {
-//                 const data = doc.data();
-//                 numbers.add(data.userPhoneNumber);
-//             });
-//             setPhoneNumbers(Array.from(numbers));
-//         };
-
-//         fetchPhoneNumbers();
-//     }, []);
-
-//     return (
-//         <div className="container mx-auto p-4">
-//             <h1 className="text-2xl font-bold mb-4">Received Numbers</h1>
-//             <ul>
-//                 {phoneNumbers.map((number) => (
-//                     <li key={number}>
-//                         <Link href={`/${number}`} className="text-blue-600 hover:underline">
-//                             {number}
-//                         </Link>
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     );
-// }
-
 
 "use client";
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function Home() {
     const [phoneNumbers, setPhoneNumbers] = useState([]);
 
     useEffect(() => {
-        const fetchPhoneNumbers = async () => {
-            try {
-                const querySnapshot = await getDocs(collection(db, 'messages'));
-                const numbers = new Set();
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    numbers.add(data.userPhoneNumber);
-                });
-                setPhoneNumbers(Array.from(numbers));
-            } catch (error) {
-                console.error("Error fetching phone numbers:", error);
-            }
-        };
+        const unsubscribe = onSnapshot(collection(db, 'messages'), (snapshot) => {
+            const numbers = new Set();
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                numbers.add(data.userPhoneNumber);
+            });
+            setPhoneNumbers(Array.from(numbers));
+        }, (error) => {
+            console.error("Error fetching phone numbers:", error);
+        });
 
-        fetchPhoneNumbers();
+        return () => unsubscribe();
     }, []);
 
     return (
@@ -93,19 +51,16 @@ export default function Home() {
                                                 <h3 className="text-xl font-medium text-gray-800">{number}</h3>
                                             </div>
                                         </div>
-                                        <p className="text-gray-600">Click to view messages and interact with the user.</p>
+                                        <p className="text-gray-600">Click to view messages</p>
                                     </div>
                                 </Link>
                             ))
                         ) : (
-                            <p className="text-gray-600">No phone numbers found.</p>
+                            <p className="text-gray-600">No phone numbers available.</p>
                         )}
                     </div>
                 </div>
             </main>
-            <footer className="bg-gray-900 text-white p-4 text-center">
-                <p>&copy; {new Date().getFullYear()} THE MADi. All rights reserved.</p>
-            </footer>
         </div>
     );
 }
