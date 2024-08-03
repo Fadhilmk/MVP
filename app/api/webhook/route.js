@@ -32,7 +32,7 @@ export async function POST(req) {
         const messageBody = message.text.body;
         const userPhoneNumber = message.from;
         const messageId = message.id;
-        const timestamp = message.timestamp;
+        const timestamp = new Date(message.timestamp * 1000); // Convert Unix timestamp to JavaScript Date
 
         // Save the message to Firebase
         await addDoc(collection(db, 'messages'), {
