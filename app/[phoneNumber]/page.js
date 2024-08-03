@@ -1,10 +1,171 @@
 
+// "use client";
+// import { useEffect, useState } from "react";
+// import { db } from "../../firebase";
+// import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+
+// const PHONE_NUMBER_ID = '405411442646087';
+// const ACCESS_TOKEN = 'EAAYbZBkW0wTYBOxdVupkFxF9TStSVmsZASkmdkZBHsE3Y34FyAj6AV30sO8tKIWOi8z5K6F5p3LFacFiIDlCLPrlUrCKhEBQgZA2GmspPZBvgtZABre2n5KIwGQ1oORQHKDA3Pe2Yw4TnoBYlrxRrPPZB43EFlZCsU45QZCK1J5lqfPLUWiZBNZCE7sb4AEELOVYwlvLJ4HX1g5zORUCbY0jccG3SR5jmoogyWRuC33FcHRL81b';
+
+// export default function Inbox({ params }) {
+//     const { phoneNumber } = params;
+//     const [messages, setMessages] = useState([]);
+//     const [newMessage, setNewMessage] = useState("");
+//     const [userName, setUserName] = useState("User");
+
+//     useEffect(() => {
+//         const fetchDetails = async () => {
+//             try {
+//                 // Fetch user details
+//                 const userQuery = query(collection(db, "messages"), where("userPhoneNumber", "==", phoneNumber));
+//                 const userSnapshot = await getDocs(userQuery);
+
+//                 if (!userSnapshot.empty) {
+//                     const userData = userSnapshot.docs[0].data();
+//                     setUserName(userData.userName || "User"); // Set userName from data or default to "User"
+//                 } else {
+//                     console.warn("User not found");
+//                 }
+
+//                 // Fetch messages
+//                 const msgQuery = query(collection(db, "messages"), where("userPhoneNumber", "==", phoneNumber));
+//                 const msgSnapshot = await getDocs(msgQuery);
+//                 const msgs = [];
+//                 msgSnapshot.forEach((doc) => {
+//                     const data = doc.data();
+//                     const timestamp = data.sentAt || data.timestamp;
+
+//                     // Handle both Firestore Timestamp and Unix Timestamp
+//                     const date = timestamp ? (
+//                         timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(parseInt(timestamp) * 1000)
+//                     ) : new Date();
+
+//                     msgs.push({
+//                         id: doc.id,
+//                         ...data,
+//                         sentAt: date,
+//                     });
+//                 });
+
+//                 // Sort messages by timestamp (ascending order)
+//                 msgs.sort((a, b) => a.sentAt - b.sentAt);
+
+//                 setMessages(msgs);
+//             } catch (error) {
+//                 console.error("Error fetching details:", error);
+//             }
+//         };
+
+//         fetchDetails();
+//     }, [phoneNumber]);
+
+//     const handleSendMessage = async () => {
+//         if (newMessage.trim()) {
+//             try {
+//                 // Send message to WhatsApp API
+//                 const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
+//                     method: "POST",
+//                     headers: {
+//                         "Content-Type": "application/json",
+//                         Authorization: `Bearer ${ACCESS_TOKEN}`,
+//                     },
+//                     body: JSON.stringify({
+//                         messaging_product: "whatsapp",
+//                         to: phoneNumber,
+//                         type: "text",
+//                         text: { body: newMessage },
+//                     }),
+//                 });
+
+//                 if (!response.ok) {
+//                     throw new Error("Failed to send message");
+//                 }
+
+//                 // Save the sent message to Firebase
+//                 const docRef = await addDoc(collection(db, "messages"), {
+//                     userPhoneNumber: phoneNumber,
+//                     messageBody: newMessage,
+//                     sentAt: new Date(), // Ensure this is a valid Date object
+//                     read: true,
+//                 });
+
+//                 // Clear the input field
+//                 setNewMessage("");
+
+//                 // Optionally, update the local state to include the new message
+//                 setMessages((prevMessages) => [
+//                     ...prevMessages,
+//                     { id: docRef.id, userPhoneNumber: phoneNumber, messageBody: newMessage, read: true, sentAt: new Date() },
+//                 ]);
+//             } catch (error) {
+//                 console.error("Error sending message:", error);
+//             }
+//         }
+//     };
+
+//     const formatTimestamp = (timestamp) => {
+//         if (!timestamp) return 'Unknown time'; // Handle missing timestamp
+
+//         const options = {
+//             year: 'numeric',
+//             month: '2-digit',
+//             day: '2-digit',
+//             hour: '2-digit',
+//             minute: '2-digit',
+//             second: '2-digit',
+//             hour12: true,
+//         };
+//         return timestamp.toLocaleString([], options);
+//     };
+
+//     const handleBack = () => {
+//         window.history.back();
+//     };
+
+//     return (
+//         <div className="relative min-h-screen flex flex-col">
+//             <header className="fixed top-0 left-0 w-full bg-blue-500 text-white p-4 flex items-center z-10">
+//                 <button onClick={handleBack} className="flex items-center justify-center mr-4 p-1">
+//                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+//                     </svg>
+//                 </button>
+//                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+//                     {/* Placeholder for user icon */}
+//                     <span className="text-xl text-gray-700">{userName.charAt(0)}</span>
+//                 </div>
+//                 <h1 className="text-2xl font-bold ml-4">{userName}</h1>
+//             </header>
+//             <main className="flex-1 pt-20 pb-4 px-4 overflow-auto">
+//                 <ul className="mb-4">
+//                     {messages.map((msg) => (
+//                         <li key={msg.id} className={`mb-2 p-2 max-w-xs ${msg.read ? "bg-green-400 self-end text-left text-white" : "bg-gray-400 self-start text-left text-white"}`}>
+//                             <p>{msg.messageBody}</p>
+//                             <span className="text-gray-200 text-sm">{formatTimestamp(msg.sentAt)}</span>
+//                         </li>
+//                     ))}
+//                 </ul>
+//                 <textarea
+//                     value={newMessage}
+//                     onChange={(e) => setNewMessage(e.target.value)}
+//                     className="w-full p-2 border border-gray-300 rounded"
+//                     placeholder="Message"
+//                 ></textarea>
+//                 <button onClick={handleSendMessage} className="w-full mt-2 bg-blue-500 text-white p-2 rounded">
+//                     Send
+//                 </button>
+//             </main>
+//         </div>
+//     );
+// }
+
+
+
 "use client";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
 
-// Hard-coded values
 const PHONE_NUMBER_ID = '405411442646087';
 const ACCESS_TOKEN = 'EAAYbZBkW0wTYBOxdVupkFxF9TStSVmsZASkmdkZBHsE3Y34FyAj6AV30sO8tKIWOi8z5K6F5p3LFacFiIDlCLPrlUrCKhEBQgZA2GmspPZBvgtZABre2n5KIwGQ1oORQHKDA3Pe2Yw4TnoBYlrxRrPPZB43EFlZCsU45QZCK1J5lqfPLUWiZBNZCE7sb4AEELOVYwlvLJ4HX1g5zORUCbY0jccG3SR5jmoogyWRuC33FcHRL81b';
 
@@ -12,23 +173,52 @@ export default function Inbox({ params }) {
     const { phoneNumber } = params;
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const [userName, setUserName] = useState("User");
 
     useEffect(() => {
-        const fetchMessages = async () => {
-            const q = query(collection(db, "messages"), where("userPhoneNumber", "==", phoneNumber));
-            const querySnapshot = await getDocs(q);
-            const msgs = [];
-            querySnapshot.forEach((doc) => {
-                msgs.push({ id: doc.id, ...doc.data() });
-            });
+        const fetchDetails = async () => {
+            try {
+                // Fetch user details
+                const userQuery = query(collection(db, "messages"), where("userPhoneNumber", "==", phoneNumber));
+                const userSnapshot = await getDocs(userQuery);
 
-            // Sort messages by timestamp
-            msgs.sort((a, b) => (a.sentAt || a.timestamp) - (b.sentAt || b.timestamp));
+                if (!userSnapshot.empty) {
+                    const userData = userSnapshot.docs[0].data();
+                    setUserName(userData.userName || "User"); // Set userName from data or default to "User"
+                } else {
+                    console.warn("User not found");
+                }
 
-            setMessages(msgs);
+                // Fetch messages
+                const msgQuery = query(collection(db, "messages"), where("userPhoneNumber", "==", phoneNumber));
+                const msgSnapshot = await getDocs(msgQuery);
+                const msgs = [];
+                msgSnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const timestamp = data.sentAt || data.timestamp;
+
+                    // Handle both Firestore Timestamp and Unix Timestamp
+                    const date = timestamp ? (
+                        timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(parseInt(timestamp) * 1000)
+                    ) : new Date();
+
+                    msgs.push({
+                        id: doc.id,
+                        ...data,
+                        sentAt: date,
+                    });
+                });
+
+                // Sort messages by timestamp (ascending order)
+                msgs.sort((a, b) => a.sentAt - b.sentAt);
+
+                setMessages(msgs);
+            } catch (error) {
+                console.error("Error fetching details:", error);
+            }
         };
 
-        fetchMessages();
+        fetchDetails();
     }, [phoneNumber]);
 
     const handleSendMessage = async () => {
@@ -77,41 +267,58 @@ export default function Inbox({ params }) {
 
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return 'Unknown time'; // Handle missing timestamp
-        const isUnixTimestamp = !isNaN(timestamp) && timestamp.length <= 10; // Check if timestamp is Unix (seconds)
-    
-        let date;
-        if (isUnixTimestamp) {
-            // Convert Unix timestamp (in seconds) to JavaScript Date
-            date = new Date(parseInt(timestamp) * 1000);
-        } else {
-            // Convert Firebase Timestamp to JavaScript Date
-            date = new Date(timestamp.seconds * 1000);
-        }
-    
-        const options = { hour: '2-digit', minute: '2-digit', hour12: true };
-        return isNaN(date.getTime()) ? 'Invalid time' : date.toLocaleTimeString([], options);
+
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+        };
+        return timestamp.toLocaleString([], options);
+    };
+
+    const handleBack = () => {
+        window.history.back();
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Inbox for {phoneNumber}</h1>
-            <ul className="mb-4">
-                {messages.map((msg) => (
-                    <li key={msg.id} className={`mb-2 p-2 max-w-xs ${msg.read ? "bg-blue-100 self-end text-right" : "bg-gray-200 self-start text-left"}`}>
-                        <p>{msg.messageBody}</p>
-                        <span className="text-gray-500 text-sm">{formatTimestamp(msg.sentAt || msg.timestamp)}</span>
-                    </li>
-                ))}
-            </ul>
-            <textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
-                placeholder="Type your message..."
-            ></textarea>
-            <button onClick={handleSendMessage} className="mt-2 bg-blue-500 text-white p-2 rounded">
-                Send
-            </button>
+        <div className="flex flex-col h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('/walpaper2.jpg')` }}>
+            <header className="bg-blue-500 text-white p-4 flex items-center z-10">
+                <button onClick={handleBack} className="flex items-center justify-center mr-4 p-1">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                    {/* Placeholder for user icon */}
+                    <span className="text-xl text-gray-700">{userName.charAt(0)}</span>
+                </div>
+                <h1 className="text-2xl font-bold ml-4">{userName}</h1>
+            </header>
+            <main className="flex-1 p-4 overflow-auto">
+                <ul className="">
+                    {messages.map((msg) => (
+                        <li key={msg.id} className={`mb-2 p-2 max-w-xs ${msg.read ? "bg-green-400 self-end text-left text-white" : "bg-gray-400 self-start text-left text-white"}`}>
+                            <p>{msg.messageBody}</p>
+                            <span className="text-gray-200 text-sm">{formatTimestamp(msg.sentAt)}</span>
+                        </li>
+                    ))}
+                </ul>
+            </main>
+            <footer className="bg-white p-4 border-t border-gray-300 flex flex-col items-center">
+                <textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded mb-2"
+                    placeholder="Message"
+                ></textarea>
+                <button onClick={handleSendMessage} className="w-full bg-blue-500 text-white p-2 rounded">
+                    Send
+                </button>
+            </footer>
         </div>
     );
 }
