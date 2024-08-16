@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 
 // Replace with your WhatsApp Business Account ID and access token
 const whatsappBusinessAccountId = '321322121074843';
-const accessToken = 'EAAYbZBkW0wTYBO2yP2ZCliYgqaw3edFcOdFKFACoKKu9tSIbtiIQ1OnO7m5OcFGUlI8BxS5QgqSYMO4sphpYCThCfjeG4ByZB3jwYwgh8oVZC1eO260yRMSK7W7N0C9ypfRvMBxXwHYz76v97OQKX6ZAwSPkASzYZBgaXUkPZASBnvMW7shgCIC5c5m0LhaQoadjqX3ZAP93DdZBLxJj6IBls4LOuX9gPleqFRRw8uB4ScQUZD';
+const accessToken = 'EAAYbZBkW0wTYBOw8Wpr8M36iTAlC8rm5ry0wzZBJVdBTG1LJiaNxZAwfiZBL5aRCAosi0m49W2Nwev8ufAKqaK8aiwcZBcCoZCKUCKZCViQUggopnnTb65MxVA49RfKjhcWDiAs3hPRKbXug9nqnVuf4yKgg2ZA4ldyYbL7Mo74ZCY7amAOaoWT6NRmLVZCLKyZBggVoPJtKGjgE2oqZCYZBELMutVLYyqIerdEYboerLZBO7MWFUZD';
 
 export async function GET() {
   try {
     // Fetch the list of message templates
-    const response = await fetch(`https://graph.facebook.com/v20.0/${whatsappBusinessAccountId}/message_templates?fields=name,status&limit=100`, {
+    const response = await fetch(`https://graph.facebook.com/v20.0/${whatsappBusinessAccountId}/message_templates?fields=name,status&limit=9`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       },
