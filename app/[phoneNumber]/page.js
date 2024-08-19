@@ -5,7 +5,7 @@ import { db } from "../../firebase";
 import { collection, query, where, onSnapshot, addDoc } from "firebase/firestore";
 
 const PHONE_NUMBER_ID = '405411442646087';
-const ACCESS_TOKEN = 'EAAYbZBkW0wTYBOxdVupkFxF9TStSVmsZASkmdkZBHsE3Y34FyAj6AV30sO8tKIWOi8z5K6F5p3LFacFiIDlCLPrlUrCKhEBQgZA2GmspPZBvgtZABre2n5KIwGQ1oORQHKDA3Pe2Yw4TnoBYlrxRrPPZB43EFlZCsU45QZCK1J5lqfPLUWiZBNZCE7sb4AEELOVYwlvLJ4HX1g5zORUCbY0jccG3SR5jmoogyWRuC33FcHRL81b';
+const ACCESS_TOKEN = 'EAAYbZBkW0wTYBO0Q0T00v7U56vNKwv9yqxk13bZA3hIMnZAFevEDKjD6B7In0FjE7ndIwOlitLl9gHd3Hmn8pYkLRVNRxhfrhhFNSXhNks8Y777sXKMJOFrkCq6p2Rbn5tTcDMoNUEiTvPTANpXZC4SFEMgltUdhveWZAZBydRgpuYk2TWTTKxW047nCl6z79OSXvCXgKQgudueTOwSp1WU4AlEXaNe5SKl6SVzpwYb1gZD';
 
 export default function Inbox({ params }) {
     const { phoneNumber } = params;
