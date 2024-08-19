@@ -8,7 +8,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const fetchTemplateDetails = async (id) => {
   const response = await fetch(
-    `https://graph.facebook.com/v20.0/${id}?access_token=EAAYbZBkW0wTYBO2VPHASf93eAYeTPotpxx97wHd7RILJZCSrupW8p9CgV0reFd0UgPo0QGqE8a4yiqlW1Snf1pL0CU9Ef1fiQFFYwbZC8Pl2E5JkZCetXVlCO2hg8Ido7j4yiZBBgsodsdZBvcRXuTNWGhv3WXBATehzhKo92R9PDOYu1vCZB5TG8sbHKI5ZB2lBPFSfqi86FJqtqBZAmqPuOaqanXyorg0galMb5tRugX8EZD`
+    `https://graph.facebook.com/v20.0/${id}?access_token=EAAYbZBkW0wTYBOyCK4SeBwNStbL54QffsQCMpGvybzSG0PAnj3y7GcSC3nLCJLKyZCfWtviEuVjmQO47zMnLZCyW6cvzZBuVSmpVQ6vwZASLTvIGCXuPnDZAQl9avF9e7oHCBJExOiZCoakNFtTecwSiH9xMpI8CNg1dLW8YVctf58iNDUWNbqhWJb8ZCbZAi7PkYn3qtUMcq8rfZAtOneJ7FJQA20fGiTXWsdUJSzuZANRG3QZD`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch template details");
@@ -327,7 +327,7 @@ const TemplateDetailsPage = () => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer EAAYbZBkW0wTYBO2VPHASf93eAYeTPotpxx97wHd7RILJZCSrupW8p9CgV0reFd0UgPo0QGqE8a4yiqlW1Snf1pL0CU9Ef1fiQFFYwbZC8Pl2E5JkZCetXVlCO2hg8Ido7j4yiZBBgsodsdZBvcRXuTNWGhv3WXBATehzhKo92R9PDOYu1vCZB5TG8sbHKI5ZB2lBPFSfqi86FJqtqBZAmqPuOaqanXyorg0galMb5tRugX8EZD`, // Replace with your actual access token
+            Authorization: `Bearer EAAYbZBkW0wTYBOyCK4SeBwNStbL54QffsQCMpGvybzSG0PAnj3y7GcSC3nLCJLKyZCfWtviEuVjmQO47zMnLZCyW6cvzZBuVSmpVQ6vwZASLTvIGCXuPnDZAQl9avF9e7oHCBJExOiZCoakNFtTecwSiH9xMpI8CNg1dLW8YVctf58iNDUWNbqhWJb8ZCbZAi7PkYn3qtUMcq8rfZAtOneJ7FJQA20fGiTXWsdUJSzuZANRG3QZD`, // Replace with your actual access token
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
