@@ -214,7 +214,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const whatsappBusinessAccountId = '321322121074843';
-const accessToken = 'EAAYbZBkW0wTYBOyCK4SeBwNStbL54QffsQCMpGvybzSG0PAnj3y7GcSC3nLCJLKyZCfWtviEuVjmQO47zMnLZCyW6cvzZBuVSmpVQ6vwZASLTvIGCXuPnDZAQl9avF9e7oHCBJExOiZCoakNFtTecwSiH9xMpI8CNg1dLW8YVctf58iNDUWNbqhWJb8ZCbZAi7PkYn3qtUMcq8rfZAtOneJ7FJQA20fGiTXWsdUJSzuZANRG3QZD';
+const accessToken = 'EAAYbZBkW0wTYBO6wjvw5yoE1ZBSXLL3o92TfIu3bJiiZBHnx2j0tYpZA69BNyTm5Hx2p6FhGWr7LGydalEBV5JGS3cmVKmVxsmSvFImNpCxeXxS4n2lDuP5BwxW6vGuTUqLB7ik9UI7VpEJb3163v4uzcPnFbhuPyd14jdttpZCB53uFSGqGen5sJuoA0Q04nWTxGy40hXrqKGw0ZBDKnu3TqwzRkPl2zrZCEQPFDZANHRsZD';
 
 const TemplatesPage = () => {
   const [templates, setTemplates] = useState([]);
