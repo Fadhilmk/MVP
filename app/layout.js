@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
         <title>My Next.js App</title>
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
         />
       </head>
       <body className={inter.className}>{children}</body>

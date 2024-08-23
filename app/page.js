@@ -134,37 +134,38 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { db } from '../firebase';
-import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, updateDoc, doc, getDocs, query, where, writeBatch } from 'firebase/firestore';
 
 export default function Home() {
     const [phoneNumbers, setPhoneNumbers] = useState([]);
-    const [activeTab, setActiveTab] = useState('received'); // Track active tab
-    const [conversations, setConversations] = useState(new Map());
+    const [activeTab, setActiveTab] = useState('received');
+    const [conversations, setConversations] = useState([]);
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'messages'), (snapshot) => {
-            const numbers = new Map();
-            const convos = new Map();
+            const receivedNumbers = new Map();
+            const conversationNumbers = new Map();
+
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const userPhoneNumber = data.userPhoneNumber;
                 const isReceived = data.recieved;
 
                 if (isReceived) {
-                    if (!numbers.has(userPhoneNumber)) {
-                        numbers.set(userPhoneNumber, { count: 0 });
+                    if (!receivedNumbers.has(userPhoneNumber)) {
+                        receivedNumbers.set(userPhoneNumber, { count: 0 });
                     }
-                    numbers.get(userPhoneNumber).count += 1;
+                    receivedNumbers.get(userPhoneNumber).count += 1;
                 } else {
-                    if (!convos.has(userPhoneNumber)) {
-                        convos.set(userPhoneNumber, { count: 0 });
+                    if (!conversationNumbers.has(userPhoneNumber)) {
+                        conversationNumbers.set(userPhoneNumber, { count: 0 });
                     }
-                    convos.get(userPhoneNumber).count += 1;
+                    conversationNumbers.get(userPhoneNumber).count += 1;
                 }
             });
 
-            setPhoneNumbers(Array.from(numbers.entries()));
-            setConversations(Array.from(convos.entries()));
+            setPhoneNumbers(Array.from(receivedNumbers.entries()));
+            setConversations(Array.from(conversationNumbers.entries()));
         }, (error) => {
             console.error("Error fetching phone numbers:", error);
         });
@@ -174,16 +175,16 @@ export default function Home() {
 
     const handleCardClick = async (number) => {
         try {
-            const querySnapshot = await getDocs(query(collection(db, 'messages'), where('userPhoneNumber', '==', number)));
+            const querySnapshot = await getDocs(query(collection(db, 'messages'), where('userPhoneNumber', '==', number), where('recieved', '==', true)));
             const batch = writeBatch(db);
-            
-            querySnapshot.forEach(doc => {
+
+            querySnapshot.forEach((doc) => {
                 batch.update(doc.ref, { recieved: false });
             });
 
             await batch.commit();
-            
-            setConversations(prev => new Map(prev).set(number, { count: (prev.get(number)?.count || 0) + 1 }));
+
+            setConversations(prev => [...prev, [number, { count: (prev.find(([num]) => num === number)?.[1].count || 0) + querySnapshot.size }]]);
             setPhoneNumbers(prev => prev.filter(([num]) => num !== number));
         } catch (error) {
             console.error("Error updating message status:", error);
