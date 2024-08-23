@@ -20,7 +20,8 @@ export async function GET(req) {
 export async function POST(req) {
     try {
         const body = await req.json();
-        console.log('Incoming webhook:', JSON.stringify(body));
+        
+        console.log('Full webhook event:', JSON.stringify(body, null, 2));
 
         // Extracting the required data
         const entry = body.entry[0];
