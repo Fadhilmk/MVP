@@ -6,7 +6,7 @@ import CategoryTypeCards from "./CategoryTypeCards";
 
 const whatsappBusinessAccountId = "321322121074843";
 const accessToken =
-  "EAAYbZBkW0wTYBOyCK4SeBwNStbL54QffsQCMpGvybzSG0PAnj3y7GcSC3nLCJLKyZCfWtviEuVjmQO47zMnLZCyW6cvzZBuVSmpVQ6vwZASLTvIGCXuPnDZAQl9avF9e7oHCBJExOiZCoakNFtTecwSiH9xMpI8CNg1dLW8YVctf58iNDUWNbqhWJb8ZCbZAi7PkYn3qtUMcq8rfZAtOneJ7FJQA20fGiTXWsdUJSzuZANRG3QZD";
+  "EAAYbZBkW0wTYBO8MufpJln3szUjyPx8aesb2USJgmYgd9jnqoOwTA7lGASvmv9sVtEDUyQNTZC3KAtZCj6im6eZAtdFYYxeRe0Hag86tUP8ODmNUR7s5uI1VavN712iuUpBAyQPZCCQOsMXu5oX0UY72B8kAvy1L65Er2XoATfT0CFAzOELTzVnL3YuYsfMSXogZDZD";
 
 const toIST = (date) => {
   const offset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30

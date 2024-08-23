@@ -1,0 +1,1358 @@
+// "use client";
+
+// import React, { useEffect, useState } from "react";
+// import { useRouter, useParams } from "next/navigation";
+// import { storage, db } from "../../../firebase"; // Adjust the path to your firebaseConfig.js
+// import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+
+// const fetchTemplateDetails = async (id) => {
+//   const response = await fetch(
+//     `https://graph.facebook.com/v20.0/${id}?access_token=EAAYbZBkW0wTYBO3xC8FuJwifc82fF7mKQCbKHZAuAGUFgY2U5ZBKOmZBt1imKdgsQY44mDYubi5J1AsOKbExyVBxt3UYRkpqPhSNJBfAR9cZCi2sIAO3mYRs6q8YZBbh1hc4kO4qZBZCadPORtZBURX1iQ1ZBuUXJ0ZAR8dHPxi8mlSzFCIehUptSQYCxNx7MaCfpNTF5LriZBEwXBFGmFq6ar3rnWSFZAmL9LWbJBh299wZBeZAMgZD`
+//   );
+//   if (!response.ok) {
+//     throw new Error("Failed to fetch template details");
+//   }
+//   return response.json();
+// };
+
+// const fetchTemplateAnalytics = async (templateId) => {
+//   try {
+//     const response = await fetch(
+//       `https://graph.facebook.com/v20.0/321322121074843/template_analytics?start=1721573318&end=1724271518&granularity=daily&metric_types=cost,clicked,delivered,read,sent&template_ids=[${templateId}]`,
+//       {
+//         method: "GET",
+//         headers: {
+//           Authorization: `Bearer EAAYbZBkW0wTYBO3xC8FuJwifc82fF7mKQCbKHZAuAGUFgY2U5ZBKOmZBt1imKdgsQY44mDYubi5J1AsOKbExyVBxt3UYRkpqPhSNJBfAR9cZCi2sIAO3mYRs6q8YZBbh1hc4kO4qZBZCadPORtZBURX1iQ1ZBuUXJ0ZAR8dHPxi8mlSzFCIehUptSQYCxNx7MaCfpNTF5LriZBEwXBFGmFq6ar3rnWSFZAmL9LWbJBh299wZBeZAMgZD`, // Replace with your access token
+//         },
+//       }
+//     );
+
+//     if (!response.ok) {
+//       throw new Error("Failed to fetch template analytics");
+//     }
+
+//     const data = await response.json();
+//     return data.data[0]; // Assuming you want to use the first data point
+//   } catch (error) {
+//     console.error("Error fetching template analytics:", error);
+//     return null;
+//   }
+// };
+
+// const TemplateDetailsPage = () => {
+//   const router = useRouter();
+//   const { templateId } = useParams();
+//   const [templateDetails, setTemplateDetails] = useState(null);
+//   const [error, setError] = useState(null);
+//   const [phoneNumber, setPhoneNumber] = useState("");
+//   const [headerParameters, setHeaderParameters] = useState([]);
+//   const [bodyParameters, setBodyParameters] = useState([]);
+//   const [location, setLocation] = useState({
+//     latitude: "37.7749", // Random latitude for demo
+//     longitude: "-122.4194", // Random longitude for demo
+//     name: "Random Place",
+//     address: "123 Random Street, San Francisco, CA",
+//   });
+//   const [document, setDocument] = useState(null);
+//   const [video, setVideo] = useState(null);
+//   const [image, setImage] = useState(null);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [phoneNumbers, setPhoneNumbers] = useState([]);
+//   const [selectedNumbers, setSelectedNumbers] = useState([]);
+//   const [isAllSelected, setIsAllSelected] = useState(false);
+//   const [campaigns, setCampaigns] = useState([]);
+//   const [analyticsData, setAnalyticsData] = useState(null);
+
+//   useEffect(() => {
+//     if (templateId) {
+//       fetchTemplateDetails(templateId)
+//         .then((data) => setTemplateDetails(data))
+//         .catch((error) =>
+//           setError("Error fetching template details: " + error.message)
+//         );
+
+//       fetchTemplateAnalytics(templateId)
+//         .then((data) => setAnalyticsData(data))
+//         .catch((error) =>
+//           console.error("Error fetching analytics data:", error)
+//         );
+
+//       const fetchCampaigns = async () => {
+//         const q = query(
+//           collection(db, "campaigns"),
+//           where("templateId", "==", templateId)
+//         );
+//         const querySnapshot = await getDocs(q);
+//         const campaignsData = [];
+//         querySnapshot.forEach((doc) => {
+//           campaignsData.push(doc.data());
+//         });
+//         setCampaigns(campaignsData);
+//       };
+
+//       fetchCampaigns();
+//     }
+//   }, [templateId]);
+
+//   const fetchPhoneNumbers = async () => {
+//     const querySnapshot = await getDocs(collection(db, "phoneNumbers")); // Adjust the collection name as needed
+//     const numbers = [];
+//     querySnapshot.forEach((doc) => {
+//       numbers.push({ id: doc.id, ...doc.data() });
+//     });
+//     setPhoneNumbers(numbers);
+//   };
+
+//   const renderAnalyticsTable = (analyticsData) => {
+//     return (
+//       <table className="table-auto w-full border-collapse border border-gray-300 shadow-lg">
+//         <thead className="bg-gray-200">
+//           <tr>
+//             <th className="border border-gray-300 px-4 py-2 text-center">
+//               <span className="inline-flex items-center text-amber-500">
+//                 <span className="material-icons mr-1">calendar_today</span> Date
+//               </span>
+//             </th>
+//             <th className="border border-gray-300 px-4 py-2 text-center">
+//               <span className="inline-flex items-center text-blue-500">
+//                 <span className="material-icons mr-1">send</span> Sent
+//               </span>
+//             </th>
+//             <th className="border border-gray-300 px-4 py-2 text-center">
+//               <span className="inline-flex items-center text-green-400">
+//                 <span className="material-icons mr-1">done_all</span> Delivered
+//               </span>
+//             </th>
+//             <th className="border border-gray-300 px-4 py-2 text-center">
+//               <span className="inline-flex items-center text-teal-400">
+//                 <span className="material-icons mr-1">attach_money</span> Total Cost
+//               </span>
+//             </th>
+//             {analyticsData.data_points.some((point) => point.clicked?.length > 0) && (
+//               <>
+//                 <th className="border border-gray-300 px-4 py-2 text-center">
+//                   <span className="inline-flex items-center text-red-600">
+//                     <span className="material-icons mr-1">text_fields</span> Button Content
+//                   </span>
+//                 </th>
+//                 <th className="border border-gray-300 px-4 py-2 text-center">
+//                   <span className="inline-flex items-center">
+//                     <span className="material-icons mr-1">mouse</span> Click Count
+//                   </span>
+//                 </th>
+//               </>
+//             )}
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {analyticsData.data_points
+//             .filter((point) => point.sent > 0 || point.delivered > 0)
+//             .map((point, index) => {
+//               // Calculate total cost
+//               const totalCost = point.cost.reduce((sum, cost) => sum + (cost.value || 0), 0);
+  
+//               return (
+//                 <tr key={index}>
+//                   <td className="border border-gray-300 px-4 py-2 text-center">
+//                     {new Date(point.start * 1000).toLocaleDateString()}
+//                   </td>
+//                   <td className="border border-gray-300 px-4 py-2 text-center">
+//                     {point.sent}
+//                   </td>
+//                   <td className="border border-gray-300 px-4 py-2 text-center">
+//                     {point.delivered}
+//                   </td>
+//                   <td className="border border-gray-300 px-4 py-2 text-center">
+//                     ${totalCost.toFixed(2)}
+//                   </td>
+//                   {point.clicked?.length > 0 ? (
+//                     point.clicked.map((click, clickIndex) => (
+//                       <React.Fragment key={clickIndex}>
+//                         <td className="border border-gray-300 px-4 py-2 text-center">
+//                           {click.button_content}
+//                         </td>
+//                         <td className="border border-gray-300 px-4 py-2 text-center">
+//                           {click.count}
+//                         </td>
+//                       </React.Fragment>
+//                     ))
+//                   ) : (
+//                     <>
+//                       <td className="border border-gray-300 px-4 py-2 text-center" colSpan={2}>
+//                         No Click Data
+//                       </td>
+//                     </>
+//                   )}
+//                 </tr>
+//               );
+//             })}
+//         </tbody>
+//       </table>
+//     );
+//   };
+//   const renderComponent = (component) => {
+//     switch (component.type) {
+//       case "HEADER":
+//         if (component.format === "TEXT") {
+//           return (
+//             <div className="p-2 bg-white">
+//               <strong>{component.text}</strong>
+//             </div>
+//           );
+//         } else if (
+//           component.format === "IMAGE" &&
+//           component.example?.header_handle?.[0]
+//         ) {
+//           const imageUrl = component.example.header_handle[0];
+//           return (
+//             <div className="p-2 bg-white">
+//               <img
+//                 src={imageUrl}
+//                 alt="Header Image"
+//                 className="w-full h-auto rounded"
+//               />
+//             </div>
+//           );
+//         } else if (
+//           component.format === "VIDEO" &&
+//           component.example?.header_handle?.[0]
+//         ) {
+//           const videoUrl = component.example.header_handle[0];
+//           return (
+//             <div className="p-2 bg-white">
+//               <video controls className="w-full h-auto rounded">
+//                 <source src={videoUrl} type="video/mp4" />
+//                 Your browser does not support the video tag.
+//               </video>
+//             </div>
+//           );
+//         } else if (component.format === "LOCATION") {
+//           return (
+//             <div className="p-2 bg-white">
+//               <div>
+//                 <strong>Location:</strong>
+//               </div>
+//               <div className="mt-2">
+//                 <p>Latitude: {location.latitude}</p>
+//                 <p>Longitude: {location.longitude}</p>
+//                 <p>Name: {location.name}</p>
+//                 <p>Address: {location.address}</p>
+//               </div>
+//             </div>
+//           );
+//         } else if (
+//           component.format === "DOCUMENT" &&
+//           component.example?.header_handle?.[0]
+//         ) {
+//           const documentUrl = component.example.header_handle[0];
+//           return (
+//             <div className="p-2 bg-white">
+//               <a
+//                 href={documentUrl}
+//                 target="_blank"
+//                 rel="noopener noreferrer"
+//                 className="text-blue-500 underline"
+//               >
+//                 View Document
+//               </a>
+//             </div>
+//           );
+//         }
+//         break;
+//       case "BODY":
+//         return (
+//           <div className="p-2 bg-white">
+//             <p>{component.text}</p>
+//           </div>
+//         );
+//       case "FOOTER":
+//         return (
+//           <div className="p-2 bg-white text-sm text-gray-600">
+//             {component.text}
+//           </div>
+//         );
+//       case "BUTTONS":
+//         return (
+//           <div className="flex flex-wrap space-x-2 p-2 bg-white">
+//             {component.buttons.map((button, index) => (
+//               <button
+//                 key={index}
+//                 className="bg-gray-300 text-blue-500 font-bold px-4 py-2 rounded-md mb-2"
+//               >
+//                 {button.text}
+//               </button>
+//             ))}
+//           </div>
+//         );
+//       default:
+//         return null;
+//     }
+//   };
+
+//   const handleHeaderParameterChange = (index, value) => {
+//     setHeaderParameters((prev) => ({
+//       ...prev,
+//       [index]: value,
+//     }));
+//   };
+
+//   const handleImageChange = (e) => {
+//     setImage(e.target.files[0]);
+//   };
+
+//   const handleBodyParameterChange = (index, value) => {
+//     setBodyParameters((prev) => ({
+//       ...prev,
+//       [index]: value,
+//     }));
+//   };
+
+//   const handleLocationChange = (field, value) => {
+//     setLocation((prev) => ({
+//       ...prev,
+//       [field]: value,
+//     }));
+//   };
+
+//   const handleDocumentChange = (e) => {
+//     setDocument(e.target.files[0]);
+//   };
+
+//   const handleVideoChange = (e) => {
+//     setVideo(e.target.files[0]);
+//   };
+
+//   const handleUpload = async (file, fileType) => {
+//     if (!file) return "";
+
+//     const fileRef = ref(storage, `${fileType}/${file.name}`);
+//     await uploadBytes(fileRef, file);
+//     const url = await getDownloadURL(fileRef);
+//     return url;
+//   };
+
+//   const handleSendMessage = async () => {
+//     if (!selectedNumbers.length || !templateDetails) return;
+
+//     try {
+//       const documentUrl = document
+//         ? await handleUpload(document, "documents")
+//         : "";
+//       const videoUrl = video ? await handleUpload(video, "videos") : "";
+//       const imageUrl = image ? await handleUpload(image, "images") : "";
+
+//       const headerComponent = templateDetails.components.find(
+//         (component) => component.type === "HEADER"
+//       );
+
+//       let headerParametersFormatted = [];
+
+//       if (
+//         headerComponent?.format === "TEXT" &&
+//         headerComponent.text.includes("{{")
+//       ) {
+//         headerParametersFormatted = headerParameters.map((param) => ({
+//           type: "text",
+//           text: param,
+//         }));
+//       } else if (headerComponent?.format === "IMAGE") {
+//         headerParametersFormatted = [
+//           {
+//             type: "image",
+//             image: {
+//               link: imageUrl,
+//             },
+//           },
+//         ];
+//       } else if (headerComponent?.format === "VIDEO") {
+//         headerParametersFormatted = [
+//           {
+//             type: "video",
+//             video: {
+//               link: videoUrl,
+//             },
+//           },
+//         ];
+//       }
+
+//       const bodyComponent = templateDetails.components.find(
+//         (component) => component.type === "BODY"
+//       );
+
+//       const bodyParametersFormatted =
+//         bodyComponent?.example?.body_text?.[0]?.map((text, index) => ({
+//           type: "text",
+//           text: bodyParameters[index] || text,
+//         })) || [];
+
+//       const components = [
+//         headerParametersFormatted.length > 0 && {
+//           type: "header",
+//           parameters: headerParametersFormatted,
+//         },
+//         {
+//           type: "body",
+//           parameters: bodyParametersFormatted,
+//         },
+//       ].filter(Boolean);
+
+//       if (
+//         headerComponent?.format === "LOCATION" &&
+//         headerParametersFormatted.length === 0
+//       ) {
+//         components.push({
+//           type: "header",
+//           parameters: [
+//             {
+//               type: "location",
+//               location: {
+//                 latitude: location.latitude,
+//                 longitude: location.longitude,
+//                 name: location.name,
+//                 address: location.address,
+//               },
+//             },
+//           ],
+//         });
+//       } else if (headerComponent?.format === "DOCUMENT") {
+//         components.push({
+//           type: "header",
+//           parameters: [
+//             {
+//               type: "document",
+//               document: {
+//                 link: documentUrl,
+//                 filename: document.name,
+//               },
+//             },
+//           ],
+//         });
+//       }
+
+//       for (let i = 0; i < selectedNumbers.length; i++) {
+//         const phoneNumber = selectedNumbers[i];
+
+//         const response = await fetch(
+//           `https://graph.facebook.com/v20.0/405411442646087/messages`,
+//           {
+//             method: "POST",
+//             headers: {
+//               Authorization: `Bearer EAAYbZBkW0wTYBO3xC8FuJwifc82fF7mKQCbKHZAuAGUFgY2U5ZBKOmZBt1imKdgsQY44mDYubi5J1AsOKbExyVBxt3UYRkpqPhSNJBfAR9cZCi2sIAO3mYRs6q8YZBbh1hc4kO4qZBZCadPORtZBURX1iQ1ZBuUXJ0ZAR8dHPxi8mlSzFCIehUptSQYCxNx7MaCfpNTF5LriZBEwXBFGmFq6ar3rnWSFZAmL9LWbJBh299wZBeZAMgZD`,
+//               "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({
+//               messaging_product: "whatsapp",
+//               to: phoneNumber,
+//               type: "template",
+//               template: {
+//                 name: templateDetails.name, // Ensure this name exists and is correct
+//                 language: {
+//                   code: templateDetails.language || "en_US",
+//                 }, // Ensure the language code matches the template
+//                 components,
+//               },
+//             }),
+//           }
+//         );
+
+//         const data = await response.json();
+//         if (!response.ok) {
+//           throw new Error(
+//             `Failed to send message: ${
+//               data.error?.message || response.statusText
+//             }`
+//           );
+//         }
+//       }
+
+//       await addDoc(collection(db, "campaigns"), {
+//         templateId: templateId,
+//         templateName: templateDetails.name,
+//         messageSentCount: selectedNumbers.length,
+//         messageSentDate: new Date(),
+//       });
+
+//       alert("Messages sent successfully!");
+//     } catch (error) {
+//       console.error("Error sending message:", error);
+//       alert("Error sending message: " + error.message);
+//     }
+//   };
+
+//   const openModal = () => {
+//     setIsModalOpen(true);
+//     fetchPhoneNumbers(); // Fetch phone numbers when modal is opened
+//   };
+
+//   const closeModal = () => {
+//     setIsModalOpen(false);
+//   };
+
+//   const toggleNumberSelection = (number) => {
+//     setSelectedNumbers((prev) =>
+//       prev.includes(number)
+//         ? prev.filter((n) => n !== number)
+//         : [...prev, number]
+//     );
+//   };
+
+//   const toggleSelectAll = () => {
+//     if (isAllSelected) {
+//       setSelectedNumbers([]);
+//     } else {
+//       setSelectedNumbers(phoneNumbers.map((number) => number.phone));
+//     }
+//     setIsAllSelected(!isAllSelected);
+//   };
+
+//   if (error) {
+//     return <p>{error}</p>;
+//   }
+
+//   if (!templateDetails) {
+//     return <p>Loading template details...</p>;
+//   }
+
+//   return (
+//     <div className="p-6 space-y-6">
+//       {/* Header Section */}
+//       <div className="bg-blue-500 p-4 rounded-lg shadow-md text-white">
+//         <h1 className="text-2xl font-bold mb-2 text-white">
+//           {templateDetails.name}
+//         </h1>
+//         <p>
+//           <strong>Category:</strong> {templateDetails.category}
+//         </p>
+//         <p>
+//           <strong>Status:</strong> {templateDetails.status}
+//         </p>
+//         <p>
+//           <strong>Language:</strong> {templateDetails.language}
+//         </p>
+//       </div>
+
+//       <div className="flex flex-col lg:flex-row-reverse lg:space-x-reverse lg:space-x-6 space-y-6 lg:space-y-0">
+//         {/* Template Details Section - Now on the Right */}
+//         <div
+//           className="lg:w-1/5 bg-white p-4 rounded-lg shadow-md"
+//           style={{
+//             backgroundImage:
+//               'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")',
+//             backgroundSize: "cover",
+//             backgroundPosition: "center",
+//           }}
+//         >
+//           <h2 className="text-xl font-bold mb-4">Template Details</h2>
+//           <div
+//             className="p-1"
+//             style={{
+//               background: "white",
+//               borderRadius: "10px",
+//               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+//             }}
+//           >
+//             {templateDetails.components.map((component, index) => (
+//               <div key={index}>{renderComponent(component)}</div>
+//             ))}
+//           </div>
+//         </div>
+
+//         {/* Send Message Section - Now on the Left */}
+//         <div className="lg:w-4/5 bg-white p-6 rounded-lg shadow-md">
+//           <h2 className="text-xl font-bold mb-4">
+//             Send Message With This Template
+//           </h2>
+//           <div className="mt-4">
+//             <label className="block font-semibold mb-2">Phone Number</label>
+//             <input
+//               type="text"
+//               value={phoneNumber}
+//               onChange={(e) => setPhoneNumber(e.target.value)}
+//               className="border border-gray-300 p-2 rounded w-full mb-2 text black"
+//             />
+//             <button
+//               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-2 mt-2"
+//               onClick={openModal}
+//             >
+//               Select Phone Number
+//             </button>
+//           </div>
+
+//           {/* Render input fields for HEADER parameters if applicable */}
+//           {templateDetails?.components.map(
+//             (component, index) =>
+//               component.type === "HEADER" && (
+//                 <>
+//                   {component.format === "TEXT" &&
+//                     component.text.includes("{{") && (
+//                       <div key={index} className="mb-4">
+//                         <label className="block font-medium mb-1">
+//                           Header Parameter
+//                         </label>
+//                         {Array.isArray(component.example?.header_text) ? (
+//                           component.example.header_text.map(
+//                             (text, paramIndex) => (
+//                               <input
+//                                 key={paramIndex}
+//                                 type="text"
+//                                 value={headerParameters[paramIndex] || ""}
+//                                 onChange={(e) =>
+//                                   handleHeaderParameterChange(
+//                                     paramIndex,
+//                                     e.target.value
+//                                   )
+//                                 }
+//                                 className="w-full p-2 rounded border text-black"
+//                               />
+//                             )
+//                           )
+//                         ) : (
+//                           <input
+//                             type="text"
+//                             value={
+//                               headerParameters[0] ||
+//                               component.example?.header_text ||
+//                               ""
+//                             }
+//                             onChange={(e) =>
+//                               handleHeaderParameterChange(0, e.target.value)
+//                             }
+//                             className="w-full p-2 rounded border text-black"
+//                           />
+//                         )}
+//                       </div>
+//                     )}
+
+//                   {component.format === "IMAGE" && (
+//                     <div key={index} className="mb-4">
+//                       <label className="block font-medium mb-1">
+//                         Upload Image
+//                       </label>
+//                       <input
+//                         type="file"
+//                         accept="image/*"
+//                         onChange={handleImageChange}
+//                         className="w-full p-2 rounded border"
+//                       />
+//                     </div>
+//                   )}
+
+//                   {component.format === "VIDEO" && (
+//                     <div key={index} className="mb-4">
+//                       <label className="block font-medium mb-1">
+//                         Upload Video
+//                       </label>
+//                       <input
+//                         type="file"
+//                         accept="video/*"
+//                         onChange={handleVideoChange}
+//                         className="w-full p-2 rounded border"
+//                       />
+//                     </div>
+//                   )}
+//                 </>
+//               )
+//           )}
+
+//           {/* Render input fields for BODY parameters */}
+//           {templateDetails.components.map(
+//             (component, index) =>
+//               component.type === "BODY" &&
+//               component.example?.body_text?.[0]?.map((text, paramIndex) => (
+//                 <div key={paramIndex} className="mb-4">
+//                   <label className="block font-medium mb-1">
+//                     Parameter {paramIndex + 1}
+//                   </label>
+//                   <input
+//                     type="text"
+//                     value={bodyParameters[paramIndex] || ""}
+//                     onChange={(e) =>
+//                       handleBodyParameterChange(paramIndex, e.target.value)
+//                     }
+//                     className="w-full p-2 rounded border text-black"
+//                   />
+//                 </div>
+//               ))
+//           )}
+
+//           {/* Render input fields for LOCATION header if applicable */}
+//           {templateDetails.components.map(
+//             (component, index) =>
+//               component.type === "HEADER" &&
+//               component.format === "LOCATION" && (
+//                 <div key={index} className="mb-4">
+//                   <label className="block font-medium mb-1">Latitude</label>
+//                   <input
+//                     type="text"
+//                     value={location.latitude}
+//                     onChange={(e) =>
+//                       handleLocationChange("latitude", e.target.value)
+//                     }
+//                     className="w-full p-2 rounded border text-black"
+//                   />
+//                   <label className="block font-medium mb-1 mt-2">
+//                     Longitude
+//                   </label>
+//                   <input
+//                     type="text"
+//                     value={location.longitude}
+//                     onChange={(e) =>
+//                       handleLocationChange("longitude", e.target.value)
+//                     }
+//                     className="w-full p-2 rounded border text-black"
+//                   />
+//                   <label className="block font-medium mb-1 mt-2">Name</label>
+//                   <input
+//                     type="text"
+//                     value={location.name}
+//                     onChange={(e) =>
+//                       handleLocationChange("name", e.target.value)
+//                     }
+//                     className="w-full p-2 rounded border text-black"
+//                   />
+//                   <label className="block font-medium mb-1 mt-2">Address</label>
+//                   <input
+//                     type="text"
+//                     value={location.address}
+//                     onChange={(e) =>
+//                       handleLocationChange("address", e.target.value)
+//                     }
+//                     className="w-full p-2 rounded border text-black"
+//                   />
+//                 </div>
+//               )
+//           )}
+
+//           {/* Render input fields for DOCUMENT header if applicable */}
+//           {templateDetails.components.map(
+//             (component, index) =>
+//               component.type === "HEADER" &&
+//               component.format === "DOCUMENT" && (
+//                 <div key={index} className="mb-4">
+//                   <label className="block font-medium mb-1">
+//                     Upload Document
+//                   </label>
+//                   <input
+//                     type="file"
+//                     onChange={handleDocumentChange}
+//                     className="w-full p-2 rounded border"
+//                   />
+//                 </div>
+//               )
+//           )}
+
+//           <button
+//             onClick={handleSendMessage}
+//             className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+//           >
+//             Send Message
+//           </button>
+
+//           {isModalOpen && (
+//             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+//               <div className="bg-white p-6 rounded-lg shadow-lg w-4/5 max-w-lg">
+//                 <h2 className="text-xl font-bold mb-4">Select Phone Numbers</h2>
+//                 <table className="min-w-full bg-white">
+//                   <thead>
+//                     <tr>
+//                       <th className="w-1/12 border border-gray-300 p-2">
+//                         <input
+//                           type="checkbox"
+//                           checked={isAllSelected}
+//                           onChange={toggleSelectAll}
+//                         />
+//                       </th>
+//                       <th className="border border-gray-300 p-2">
+//                         Phone Number
+//                       </th>
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {phoneNumbers.map((number) => (
+//                       <tr key={number.id}>
+//                         <td className="border border-gray-300 p-2">
+//                           <input
+//                             type="checkbox"
+//                             checked={selectedNumbers.includes(number.phone)}
+//                             onChange={() => toggleNumberSelection(number.phone)}
+//                           />
+//                         </td>
+//                         <td className="border border-gray-300 p-2">
+//                           {number.phone}
+//                         </td>
+//                       </tr>
+//                     ))}
+//                   </tbody>
+//                 </table>
+//                 <div className="mt-4 flex justify-end">
+//                   <button
+//                     className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
+//                     onClick={closeModal}
+//                   >
+//                     Cancel
+//                   </button>
+//                   <button
+//                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+//                     onClick={closeModal}
+//                   >
+//                     Add Numbers
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//       <div className="container mx-auto p-4">
+//         <h2 className="text-xl font-bold mb-4">Template Analytics</h2>
+//         {analyticsData ? (
+//           renderAnalyticsTable(analyticsData)
+//         ) : (
+//           <p>Loading analytics data...</p>
+//         )}
+//       </div>
+
+//       <footer className="mt-8">
+//         <h2 className="text-lg font-semibold mb-4">Campaign History</h2>
+//         <div className="overflow-x-auto">
+//           <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
+//             <thead className="bg-gray-100 border-b border-gray-300">
+//               <tr>
+//                 <th className="p-3 text-left text-gray-700">Template Name</th>
+//                 <th className="p-3 text-left text-gray-700">
+//                   Message Sent Count
+//                 </th>
+//                 <th className="p-3 text-left text-gray-700">Date</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {campaigns.map((campaign, index) => (
+//                 <tr
+//                   key={index}
+//                   className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+//                 >
+//                   <td className="p-3 text-gray-900">{campaign.templateName}</td>
+//                   <td className="p-3 text-gray-900">
+//                     {campaign.messageSentCount}
+//                   </td>
+//                   <td className="p-3 text-gray-900">
+//                     {new Date(
+//                       campaign.messageSentDate.seconds * 1000
+//                     ).toLocaleDateString()}
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       </footer>
+//     </div>
+//   );
+// };
+
+// export default TemplateDetailsPage;
+
+
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { storage, db } from "../../../firebase"; // Adjust the path to your firebaseConfig.js
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+
+const fetchTemplateDetails = async (id) => {
+  const response = await fetch(
+    `https://graph.facebook.com/v20.0/${id}?access_token=EAAYbZBkW0wTYBO3xC8FuJwifc82fF7mKQCbKHZAuAGUFgY2U5ZBKOmZBt1imKdgsQY44mDYubi5J1AsOKbExyVBxt3UYRkpqPhSNJBfAR9cZCi2sIAO3mYRs6q8YZBbh1hc4kO4qZBZCadPORtZBURX1iQ1ZBuUXJ0ZAR8dHPxi8mlSzFCIehUptSQYCxNx7MaCfpNTF5LriZBEwXBFGmFq6ar3rnWSFZAmL9LWbJBh299wZBeZAMgZD`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch template details");
+  }
+  return response.json();
+};
+
+const fetchTemplateAnalytics = async (templateId, startDate, endDate) => {
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/v20.0/321322121074843/template_analytics?start=${startDate}&end=${endDate}&granularity=daily&metric_types=cost,clicked,delivered,read,sent&template_ids=[${templateId}]`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer EAAYbZBkW0wTYBO8MufpJln3szUjyPx8aesb2USJgmYgd9jnqoOwTA7lGASvmv9sVtEDUyQNTZC3KAtZCj6im6eZAtdFYYxeRe0Hag86tUP8ODmNUR7s5uI1VavN712iuUpBAyQPZCCQOsMXu5oX0UY72B8kAvy1L65Er2XoATfT0CFAzOELTzVnL3YuYsfMSXogZDZD`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch template analytics");
+    }
+
+    const data = await response.json();
+    return data.data[0]; // Assuming you want to use the first data point
+  } catch (error) {
+    console.error("Error fetching template analytics:", error);
+    return null;
+  }
+};
+const TemplateDetailsPage = () => {
+  const router = useRouter();
+  const { templateId } = useParams();
+  const [templateDetails, setTemplateDetails] = useState(null);
+  const [error, setError] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [headerParameters, setHeaderParameters] = useState([]);
+  const [bodyParameters, setBodyParameters] = useState([]);
+  const [location, setLocation] = useState({
+    latitude: "37.7749", // Random latitude for demo
+    longitude: "-122.4194", // Random longitude for demo
+    name: "Random Place",
+    address: "123 Random Street, San Francisco, CA",
+  });
+  const [document, setDocument] = useState(null);
+  const [video, setVideo] = useState(null);
+  const [image, setImage] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [selectedNumbers, setSelectedNumbers] = useState([]);
+  const [isAllSelected, setIsAllSelected] = useState(false);
+  const [campaigns, setCampaigns] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [startDate, setStartDate] = useState(
+    new Date(new Date().setMonth(new Date().getMonth() - 1))
+      .toISOString()
+      .split("T")[0] // One month ago
+  );
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split("T")[0]
+  ); // Current date
+
+  useEffect(() => {
+    if (templateId) {
+      fetchTemplateDetails(templateId, startDate, endDate)
+        .then((data) => setTemplateDetails(data))
+        .catch((error) =>
+          setError("Error fetching template details: " + error.message)
+        );
+      console.log(
+        "Fetching analytics for templateId:",
+        templateId,
+        "from",
+        startDate,
+        "to",
+        endDate
+      );
+      fetchTemplateAnalytics(templateId)
+        .then((data) => setAnalyticsData(data))
+        .catch((error) =>
+          console.error("Error fetching analytics data:", error)
+        );
+
+      const fetchCampaigns = async () => {
+        const q = query(
+          collection(db, "campaigns"),
+          where("templateId", "==", templateId)
+        );
+        const querySnapshot = await getDocs(q);
+        const campaignsData = [];
+        querySnapshot.forEach((doc) => {
+          campaignsData.push(doc.data());
+        });
+        setCampaigns(campaignsData);
+      };
+
+      fetchCampaigns();
+    }
+  }, [templateId]);
+
+  useEffect(() => {
+    const loadAnalyticsData = async () => {
+      const data = await fetchTemplateAnalytics(templateId, startDate, endDate);
+      setAnalyticsData(data);
+    };
+
+    loadAnalyticsData();
+  }, [templateId, startDate, endDate]);
+
+  const handleDateChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "startDate") {
+      setStartDate(value);
+    } else if (name === "endDate") {
+      setEndDate(value);
+    }
+  };
+
+  const fetchPhoneNumbers = async () => {
+    const querySnapshot = await getDocs(collection(db, "phoneNumbers")); // Adjust the collection name as needed
+    const numbers = [];
+    querySnapshot.forEach((doc) => {
+      numbers.push({ id: doc.id, ...doc.data() });
+    });
+    setPhoneNumbers(numbers);
+  };
+
+  
+
+  
+
+  const handleHeaderParameterChange = (index, value) => {
+    setHeaderParameters((prev) => {
+      const updatedParameters = [...prev];
+      updatedParameters[index] = value;
+      return updatedParameters;
+    });
+  };
+
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
+  const handleBodyParameterChange = (index, value) => {
+    setBodyParameters((prev) => ({
+      ...prev,
+      [index]: value,
+    }));
+  };
+
+  const handleLocationChange = (field, value) => {
+    setLocation((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleDocumentChange = (e) => {
+    setDocument(e.target.files[0]);
+  };
+
+  const handleVideoChange = (e) => {
+    setVideo(e.target.files[0]);
+  };
+
+  const handleUpload = async (file, fileType) => {
+    if (!file) return "";
+
+    const fileRef = ref(storage, `${fileType}/${file.name}`);
+    await uploadBytes(fileRef, file);
+    const url = await getDownloadURL(fileRef);
+    return url;
+  };
+
+  const handleSendMessage = async () => {
+    if (!selectedNumbers.length || !templateDetails) return;
+
+    try {
+      const documentUrl = document
+        ? await handleUpload(document, "documents")
+        : "";
+      const videoUrl = video ? await handleUpload(video, "videos") : "";
+      const imageUrl = image ? await handleUpload(image, "images") : "";
+
+      const headerComponent = templateDetails.components.find(
+        (component) => component.type === "HEADER"
+      );
+
+      let headerParametersFormatted = [];
+
+      if (Array.isArray(headerParameters)) {
+        headerParametersFormatted = headerParameters.map((param) => ({
+          type: "text",
+          text: param,
+        }));
+      } else if (headerComponent?.format === "IMAGE") {
+        headerParametersFormatted = [
+          {
+            type: "image",
+            image: {
+              link: imageUrl,
+            },
+          },
+        ];
+      } else if (headerComponent?.format === "VIDEO") {
+        headerParametersFormatted = [
+          {
+            type: "video",
+            video: {
+              link: videoUrl,
+            },
+          },
+        ];
+      }
+
+      const bodyComponent = templateDetails.components.find(
+        (component) => component.type === "BODY"
+      );
+
+      const bodyParametersFormatted =
+        bodyComponent?.example?.body_text?.[0]?.map((text, index) => ({
+          type: "text",
+          text: bodyParameters[index] || text,
+        })) || [];
+
+      const components = [
+        headerParametersFormatted.length > 0 && {
+          type: "header",
+          parameters: headerParametersFormatted,
+        },
+        {
+          type: "body",
+          parameters: bodyParametersFormatted,
+        },
+      ].filter(Boolean);
+
+      if (
+        headerComponent?.format === "LOCATION" &&
+        headerParametersFormatted.length === 0
+      ) {
+        components.push({
+          type: "header",
+          parameters: [
+            {
+              type: "location",
+              location: {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                name: location.name,
+                address: location.address,
+              },
+            },
+          ],
+        });
+      } else if (headerComponent?.format === "DOCUMENT") {
+        components.push({
+          type: "header",
+          parameters: [
+            {
+              type: "document",
+              document: {
+                link: documentUrl,
+                filename: document.name,
+              },
+            },
+          ],
+        });
+      }
+
+      for (let i = 0; i < selectedNumbers.length; i++) {
+        const phoneNumber = selectedNumbers[i];
+
+        const response = await fetch(
+          `https://graph.facebook.com/v20.0/405411442646087/messages`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer EAAYbZBkW0wTYBO8MufpJln3szUjyPx8aesb2USJgmYgd9jnqoOwTA7lGASvmv9sVtEDUyQNTZC3KAtZCj6im6eZAtdFYYxeRe0Hag86tUP8ODmNUR7s5uI1VavN712iuUpBAyQPZCCQOsMXu5oX0UY72B8kAvy1L65Er2XoATfT0CFAzOELTzVnL3YuYsfMSXogZDZD`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messaging_product: "whatsapp",
+              to: phoneNumber,
+              type: "template",
+              template: {
+                name: templateDetails.name, // Ensure this name exists and is correct
+                language: {
+                  code: templateDetails.language || "en_US",
+                }, // Ensure the language code matches the template
+                components,
+              },
+            }),
+          }
+        );
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            `Failed to send message: ${
+              data.error?.message || response.statusText
+            }`
+          );
+        }
+      }
+
+      await addDoc(collection(db, "campaigns"), {
+        templateId: templateId,
+        templateName: templateDetails.name,
+        messageSentCount: selectedNumbers.length,
+        messageSentDate: new Date(),
+      });
+
+      alert("Messages sent successfully!");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Error sending message: " + error.message);
+    }
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+    fetchPhoneNumbers(); // Fetch phone numbers when modal is opened
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const toggleNumberSelection = (number) => {
+    setSelectedNumbers((prev) =>
+      prev.includes(number)
+        ? prev.filter((n) => n !== number)
+        : [...prev, number]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedNumbers([]);
+    } else {
+      setSelectedNumbers(phoneNumbers.map((number) => number.phone));
+    }
+    setIsAllSelected(!isAllSelected);
+  };
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (!templateDetails) {
+    return <p>Loading template details...</p>;
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header Section */}
+      <div className="bg-blue-500 p-4 rounded-lg shadow-md text-white">
+        <h1 className="text-2xl font-bold mb-2 text-white">
+          {templateDetails.name}
+        </h1>
+        <p>
+          <strong>Category:</strong> {templateDetails.category}
+        </p>
+        <p>
+          <strong>Status:</strong> {templateDetails.status}
+        </p>
+        <p>
+          <strong>Language:</strong> {templateDetails.language}
+        </p>
+      </div>
+
+      <div className="flex flex-col lg:flex-row-reverse lg:space-x-reverse lg:space-x-6 space-y-6 lg:space-y-0">
+        {/* Template Details Section - Now on the Right */}
+        <div
+          className="lg:w-1/5 bg-white p-4 rounded-lg shadow-md"
+          style={{
+            backgroundImage:
+              'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <h2 className="text-xl font-bold mb-4">Template Details</h2>
+          <div
+            className="p-1"
+            style={{
+              background: "white",
+              borderRadius: "10px",
+              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            {templateDetails.components.map((component, index) => (
+              <div key={index}>{renderComponent(component)}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Send Message Section - Now on the Left */}
+        <div className="lg:w-4/5 bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-4">
+            Send Message With This Template
+          </h2>
+          <div className="mt-4">
+            <label className="block font-semibold mb-2">Phone Number</label>
+            <input
+              type="text"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full mb-2 text black"
+            />
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-2 mt-2"
+              onClick={openModal}
+            >
+              Select Phone Number
+            </button>
+          </div>
+
+          {/* Render input fields for HEADER parameters if applicable */}
+          
+
+          <button
+            onClick={handleSendMessage}
+            className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+          >
+            Send Message
+          </button>
+
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-4/5 max-w-lg">
+                <h2 className="text-xl font-bold mb-4">Select Phone Numbers</h2>
+                <table className="min-w-full bg-white">
+                  <thead>
+                    <tr>
+                      <th className="w-1/12 border border-gray-300 p-2">
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
+                          onChange={toggleSelectAll}
+                        />
+                      </th>
+                      <th className="border border-gray-300 p-2">
+                        Phone Number
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {phoneNumbers.map((number) => (
+                      <tr key={number.id}>
+                        <td className="border border-gray-300 p-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedNumbers.includes(number.phone)}
+                            onChange={() => toggleNumberSelection(number.phone)}
+                          />
+                        </td>
+                        <td className="border border-gray-300 p-2">
+                          {number.phone}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
+                    onClick={closeModal}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                    onClick={closeModal}
+                  >
+                    Add Numbers
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+
+      
+    </div>
+  );
+};
+
+export default TemplateDetailsPage;

@@ -212,9 +212,10 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Preloader from '@/components/Preloader';
 
 const whatsappBusinessAccountId = '321322121074843';
-const accessToken = 'EAAYbZBkW0wTYBOyCK4SeBwNStbL54QffsQCMpGvybzSG0PAnj3y7GcSC3nLCJLKyZCfWtviEuVjmQO47zMnLZCyW6cvzZBuVSmpVQ6vwZASLTvIGCXuPnDZAQl9avF9e7oHCBJExOiZCoakNFtTecwSiH9xMpI8CNg1dLW8YVctf58iNDUWNbqhWJb8ZCbZAi7PkYn3qtUMcq8rfZAtOneJ7FJQA20fGiTXWsdUJSzuZANRG3QZD';
+const accessToken = 'EAAYbZBkW0wTYBO8MufpJln3szUjyPx8aesb2USJgmYgd9jnqoOwTA7lGASvmv9sVtEDUyQNTZC3KAtZCj6im6eZAtdFYYxeRe0Hag86tUP8ODmNUR7s5uI1VavN712iuUpBAyQPZCCQOsMXu5oX0UY72B8kAvy1L65Er2XoATfT0CFAzOELTzVnL3YuYsfMSXogZDZD';
 
 const TemplatesPage = () => {
   const [templates, setTemplates] = useState([]);
@@ -386,7 +387,7 @@ const TemplatesPage = () => {
   };
 
   if (error) return <div>Failed to load templates.</div>;
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Preloader />;
 
   return (
     <div className="container mx-auto p-4">

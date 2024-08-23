@@ -42,6 +42,7 @@ export async function POST(req) {
             messageId,
             timestamp,
             read: false,
+            recieved:true,
         });
 
         return NextResponse.json({ message: 'EVENT_RECEIVED' });
