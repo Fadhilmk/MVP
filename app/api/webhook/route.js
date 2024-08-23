@@ -59,12 +59,27 @@ import { db } from '../../../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 async function fetchAudioUrl(audioId) {
-  const response = await fetch(
-    `https://graph.facebook.com/v20.0/${audioId}?access_token=EAAYbZBkW0wTYBO8MufpJln3szUjyPx8aesb2USJgmYgd9jnqoOwTA7lGASvmv9sVtEDUyQNTZC3KAtZCj6im6eZAtdFYYxeRe0Hag86tUP8ODmNUR7s5uI1VavN712iuUpBAyQPZCCQOsMXu5oX0UY72B8kAvy1L65Er2XoATfT0CFAzOELTzVnL3YuYsfMSXogZDZD`
-  );
-  const data = await response.json();
-  return data.url;
-}
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${audioId}?access_token=EAAYbZBkW0wTYBO8MufpJln3szUjyPx8aesb2USJgmYgd9jnqoOwTA7lGASvmv9sVtEDUyQNTZC3KAtZCj6im6eZAtdFYYxeRe0Hag86tUP8ODmNUR7s5uI1VavN712iuUpBAyQPZCCQOsMXu5oX0UY72B8kAvy1L65Er2XoATfT0CFAzOELTzVnL3YuYsfMSXogZDZD`,
+        {
+          headers: {
+            "Accept": "audio/ogg",
+            "X-Checksum": "GyXxzqtkFJ5ROGu3Dbptqwexix/uJKNovEXwRrzJ9GA="
+          }
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error fetching audio URL: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error("Error fetching audio URL:", error);
+      return null; // Return null if there's an error
+    }
+  }
+  
 
 export async function POST(req) {
   try {

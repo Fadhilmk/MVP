@@ -565,8 +565,8 @@ export default function Inbox({ params }) {
               {msg.messageType === "audio" ? (
                 <audio controls>
                   <source
-                    src={msg.audioData.audioUrl} // Use the stored URL here
-                    type={msg.audioData.mimeType}
+                   src={msg.audioData.audioUrl} // Use the stored URL here
+                   type={msg.audioData.mimeType}
                   />
                   Your browser does not support the audio element.
                 </audio>
