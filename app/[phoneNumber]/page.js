@@ -372,8 +372,6 @@
 //   );
 // }
 
-
-
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { db } from "../../firebase";
@@ -567,7 +565,7 @@ export default function Inbox({ params }) {
               {msg.messageType === "audio" ? (
                 <audio controls>
                   <source
-                    src={`https://graph.facebook.com/v20.0/${msg.audioData.audioId}`}
+                    src={msg.audioData.audioUrl} // Use the stored URL here
                     type={msg.audioData.mimeType}
                   />
                   Your browser does not support the audio element.
@@ -575,6 +573,7 @@ export default function Inbox({ params }) {
               ) : (
                 <p>{msg.messageBody}</p>
               )}
+
               <span className="text-gray-200 text-sm">
                 {formatTimestamp(msg.sentAt)}
               </span>
@@ -601,4 +600,3 @@ export default function Inbox({ params }) {
     </div>
   );
 }
-
